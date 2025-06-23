@@ -13,6 +13,12 @@ struct WeekCalendar: View {
     let calendarStartDate: Date
     let totalDays: Int
 
+    
+    func someView() -> some View {
+        Text("Hello, World!")
+    }
+    
+    
     private var weekDates: [Date] {
         let calendar = Calendar.current
         return (0..<totalDays).compactMap {

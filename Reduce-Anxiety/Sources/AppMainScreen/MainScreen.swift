@@ -6,13 +6,18 @@
 //
 
 import SwiftUI
+import AppMeditaion_Attention
+
 
 public struct HomeView: View {
     @State private var isGridMode = false
     @State private var selectedFilter: String = "Today"
+    @State private var path = NavigationPath() // ← For NavigationStack
+
     public init() {}
+
     public var body: some View {
-        NavigationView {
+        NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 HStack {
                     Text("Current progress")
@@ -43,9 +48,15 @@ public struct HomeView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
-                            CurrentProgressCell()
-                            DailyContributionsCell()
+                            ProgressAndContributionsCell()
                             DailyAdviceCell()
+                            
+                            // ✅ Wrap HowPassCourseCell in a Button
+                            Button(action: {
+                                path.append("meditations") // ← push by value
+                            }) {
+                                HowPassCourseCell()
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 12)
@@ -54,6 +65,11 @@ public struct HomeView: View {
                 Spacer()
             }
             .background(Color.white.edgesIgnoringSafeArea(.all))
+            .navigationDestination(for: String.self) { route in
+                if route == "meditations" {
+                    MeditationsView()
+                }
+            }
             .navigationBarHidden(true)
         }
     }
@@ -80,7 +96,7 @@ public struct HomeView: View {
     }
 }
 
-struct CurrentProgressCell: View {
+struct CurrentProgressContent: View {
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
             ZStack {
@@ -89,47 +105,48 @@ struct CurrentProgressCell: View {
                     .frame(width: 70, height: 70)
                 Text("55%")
                     .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.black)
             }
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Completed sessions:")
                         .font(.system(size: 16))
+                        .foregroundColor(.black)
                     Spacer()
                     Text("30")
                         .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.black)
                 }
                 HStack {
                     Text("Meditations passed:")
                         .font(.system(size: 16))
+                        .foregroundColor(.black)
                     Spacer()
                     Text("30")
                         .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.black)
                 }
                 HStack {
                     Text("Notes maked:")
                         .font(.system(size: 16))
+                        .foregroundColor(.black)
                     Spacer()
                     Text("30")
                         .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.black)
                 }
             }
         }
-        .padding(20)
-        .background(Color.yellow.opacity(0.2))
-        .cornerRadius(14)
     }
 }
 
-struct DailyContributionsCell: View {
+struct DailyContributionsContent: View {
     let rows = 7
     let columns = 12
     let cellSize: CGFloat = 20
     let spacing: CGFloat = 4
-
-    // Подставные данные активности (записи пользователя по дням)
     let contributions: [Bool] = (0..<84).map { _ in Bool.random() }
 
-    // Вычисляемые сокращённые названия месяцев над неделями
     private var monthLabels: [Int: String] {
         var labels: [Int: String] = [:]
         let calendar = Calendar.current
@@ -148,14 +165,9 @@ struct DailyContributionsCell: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            // Лейблы дней недели: M, W, F
-            
-            
             SquareViewItems()
-            
             ScrollView(.horizontal, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 4) {
-                    // Лейблы месяцев
                     HStack(spacing: spacing) {
                         ForEach(0..<columns, id: \.self) { col in
                             if let month = monthLabels[col] {
@@ -168,8 +180,6 @@ struct DailyContributionsCell: View {
                             }
                         }
                     }
-
-                    // Сетка активности: 12 недель × 7 дней
                     HStack(spacing: spacing) {
                         ForEach(0..<columns, id: \.self) { column in
                             VStack(spacing: spacing) {
@@ -185,13 +195,7 @@ struct DailyContributionsCell: View {
                     }
                 }
             }
-            
-            
-            
         }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(14)
     }
 }
 
@@ -203,6 +207,36 @@ struct DailyAdviceCell: View {
                 .foregroundColor(.purple)
             Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
                 .font(.system(size: 16))
+                .foregroundColor(.black)
+        }
+        .padding(20)
+        .background(Color.yellow.opacity(0.2))
+        .cornerRadius(14)
+    }
+}
+
+struct HowPassCourseCell: View {
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("How to pass this course:")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.purple)
+
+                Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+                    .font(.system(size: 16))
+                    .foregroundColor(.black)
+            }
+            .padding(.trailing, 20 + 15) // учёт ширины иконки и отступа
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 15, height: 40)
+                .foregroundColor(.black)
+                .padding(.trailing, 20)
         }
         .padding(20)
         .background(Color.yellow.opacity(0.2))
@@ -248,5 +282,17 @@ struct SquareViewItems: View {
             }
             Spacer() // добиваем до полного по высоте
         }
+    }
+}
+
+struct ProgressAndContributionsCell: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            CurrentProgressContent()
+            DailyContributionsContent()
+        }
+        .padding(20)
+        .background(Color.yellow.opacity(0.2))
+        .cornerRadius(14)
     }
 }

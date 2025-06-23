@@ -47,14 +47,21 @@ public struct ChatsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(chat.userName)
                                     .font(.headline)
+                                    .foregroundColor(chat.userName == "Philip" ? .white : .primary) // 👈 белый только у Philip
                                 Text(chat.lastMessage)
                                     .font(.subheadline)
                                     .lineLimit(1)
                                     .foregroundColor(.gray)
                             }
                         }
+                        .padding()
+                        .background(Color.green) // 👈 зелёный фон ячейки
+                        .cornerRadius(8)
                     }
+                    .buttonStyle(PlainButtonStyle()) // Убирает синий эффект кнопки
                 }
+                .listRowSeparator(.hidden) // убирает разделители между ячейками
+                .listRowBackground(Color.clear) // убирает системный фон ячее
                 .listStyle(PlainListStyle())
                 .navigationTitle("Chats")
 
@@ -75,6 +82,7 @@ public struct ChatsView: View {
                                .hidden()
                            )
             }
+            .background(Color.white.ignoresSafeArea())
         }
     }
 }

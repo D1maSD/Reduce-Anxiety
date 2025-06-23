@@ -49,3 +49,11 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
+struct MyView {
+    private let _counter = State<Int>(initialValue: 0)
+    var counter: Int {
+        get { _counter.wrappedValue }
+        set { _counter.wrappedValue = newValue }
+    }
+}

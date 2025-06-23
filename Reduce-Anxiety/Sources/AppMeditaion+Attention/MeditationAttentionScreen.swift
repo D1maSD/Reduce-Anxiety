@@ -17,8 +17,9 @@ struct Meditation: Identifiable {
 
 public struct MeditationsView: View {
     let meditations = [
-        Meditation(title: "Meditation 1", subtitle: "Relax and unwind", imageName: "meditation1"),
-        Meditation(title: "Meditation 2", subtitle: "Focus your mind", imageName: "meditation2")
+        Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "meditation1"),
+        Meditation(title: "Best sides of yourself", subtitle: "Focus your mind", imageName: "meditation2"),
+        Meditation(title: "Focus mind meditation", subtitle: "Focus your mind", imageName: "meditation2")
     ]
     public init() {}
     public var body: some View {
@@ -36,7 +37,7 @@ public struct MeditationsView: View {
                             ZStack(alignment: .bottomLeading) {
                                 RoundedRectangle(cornerRadius: 20)
                                     .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 250)
+                                    .frame(height: 240)
                                     .overlay(
                                         VStack(alignment: .leading, spacing: 8) {
                                             Spacer()
@@ -57,7 +58,9 @@ public struct MeditationsView: View {
                 }
             }
             .navigationBarHidden(true)
+            .background(Color.white.ignoresSafeArea())
         }
+//        .background(Color.green.ignoresSafeArea())
     }
 }
 
