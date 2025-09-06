@@ -7,13 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1867BD982E6B8820001DF909 /* AppChatView in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BD972E6B8820001DF909 /* AppChatView */; };
+		1867BD9A2E6B8820001DF909 /* AppLoginFlow in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BD992E6B8820001DF909 /* AppLoginFlow */; };
+		1867BD9C2E6B8820001DF909 /* AppMainScreen in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BD9B2E6B8820001DF909 /* AppMainScreen */; };
+		1867BD9E2E6B8820001DF909 /* AppMeditationAttention in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BD9D2E6B8820001DF909 /* AppMeditationAttention */; };
+		1867BDA02E6B8820001DF909 /* AppNotePad in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BD9F2E6B8820001DF909 /* AppNotePad */; };
+		1867BDA22E6B8820001DF909 /* AppOnboarding in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BDA12E6B8820001DF909 /* AppOnboarding */; };
+		1867BDA42E6B8820001DF909 /* AppProgressModel in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BDA32E6B8820001DF909 /* AppProgressModel */; };
+		1867BDA62E6B8820001DF909 /* AppPsychologistChat in Frameworks */ = {isa = PBXBuildFile; productRef = 1867BDA52E6B8820001DF909 /* AppPsychologistChat */; };
+		18E41DD92E45F6B700F0404C /* AppProgressModel in Frameworks */ = {isa = PBXBuildFile; productRef = 18E41DD82E45F6B700F0404C /* AppProgressModel */; };
+		18E41DDB2E46836D00F0404C /* AppNotePad in Frameworks */ = {isa = PBXBuildFile; productRef = 18E41DDA2E46836D00F0404C /* AppNotePad */; };
+		18E41DEA2E468F0300F0404C /* AppMeditationAttention in Frameworks */ = {isa = PBXBuildFile; productRef = 18E41DE92E468F0300F0404C /* AppMeditationAttention */; };
 		18F797912DF08BD800229907 /* AppChatView in Frameworks */ = {isa = PBXBuildFile; productRef = 18F797902DF08BD800229907 /* AppChatView */; };
 		18F797932DF08BD800229907 /* AppLoginFlow in Frameworks */ = {isa = PBXBuildFile; productRef = 18F797922DF08BD800229907 /* AppLoginFlow */; };
 		18F797952DF08BD800229907 /* AppMainScreen in Frameworks */ = {isa = PBXBuildFile; productRef = 18F797942DF08BD800229907 /* AppMainScreen */; };
-		18F797972DF08BD800229907 /* AppMeditaion+Attention in Frameworks */ = {isa = PBXBuildFile; productRef = 18F797962DF08BD800229907 /* AppMeditaion+Attention */; };
-		18F797992DF08BD800229907 /* AppTabBar in Frameworks */ = {isa = PBXBuildFile; productRef = 18F797982DF08BD800229907 /* AppTabBar */; };
 		18F7979C2DF09A2F00229907 /* AppOnboarding in Frameworks */ = {isa = PBXBuildFile; productRef = 18F7979B2DF09A2F00229907 /* AppOnboarding */; };
-		18F7979E2DF09A2F00229907 /* AppTabBar in Frameworks */ = {isa = PBXBuildFile; productRef = 18F7979D2DF09A2F00229907 /* AppTabBar */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,9 +47,33 @@
 		1872B9E52D935193004DE16F /* Reduce AnxietyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Reduce AnxietyUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		18117AFA2E3D65A900497DC5 /* Exceptions for "Reduce Anxiety" folder in "Reduce Anxiety" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppProgressModel.swift,
+			);
+			target = 1872B9CA2D935190004DE16F /* Reduce Anxiety */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		18117AFB2E3D65A900497DC5 /* Exceptions for "Reduce Anxiety" folder in "Copy Bundle Resources" phase from "Reduce Anxiety" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 1872B9C92D935190004DE16F /* Resources */;
+			membershipExceptions = (
+				AppProgressModel.swift,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		1872B9CD2D935190004DE16F /* Reduce Anxiety */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				18117AFA2E3D65A900497DC5 /* Exceptions for "Reduce Anxiety" folder in "Reduce Anxiety" target */,
+				18117AFB2E3D65A900497DC5 /* Exceptions for "Reduce Anxiety" folder in "Copy Bundle Resources" phase from "Reduce Anxiety" target */,
+			);
 			path = "Reduce Anxiety";
 			sourceTree = "<group>";
 		};
@@ -62,13 +94,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1867BDA02E6B8820001DF909 /* AppNotePad in Frameworks */,
 				18F797932DF08BD800229907 /* AppLoginFlow in Frameworks */,
-				18F797992DF08BD800229907 /* AppTabBar in Frameworks */,
 				18F797952DF08BD800229907 /* AppMainScreen in Frameworks */,
 				18F7979C2DF09A2F00229907 /* AppOnboarding in Frameworks */,
-				18F7979E2DF09A2F00229907 /* AppTabBar in Frameworks */,
-				18F797972DF08BD800229907 /* AppMeditaion+Attention in Frameworks */,
 				18F797912DF08BD800229907 /* AppChatView in Frameworks */,
+				1867BDA42E6B8820001DF909 /* AppProgressModel in Frameworks */,
+				1867BD9A2E6B8820001DF909 /* AppLoginFlow in Frameworks */,
+				1867BD9C2E6B8820001DF909 /* AppMainScreen in Frameworks */,
+				18E41DDB2E46836D00F0404C /* AppNotePad in Frameworks */,
+				1867BD9E2E6B8820001DF909 /* AppMeditationAttention in Frameworks */,
+				1867BD982E6B8820001DF909 /* AppChatView in Frameworks */,
+				1867BDA22E6B8820001DF909 /* AppOnboarding in Frameworks */,
+				18E41DD92E45F6B700F0404C /* AppProgressModel in Frameworks */,
+				1867BDA62E6B8820001DF909 /* AppPsychologistChat in Frameworks */,
+				18E41DEA2E468F0300F0404C /* AppMeditationAttention in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +135,7 @@
 				1872B9CD2D935190004DE16F /* Reduce Anxiety */,
 				1872B9DE2D935193004DE16F /* Reduce AnxietyTests */,
 				1872B9E82D935193004DE16F /* Reduce AnxietyUITests */,
+				18E41DD32E45ED3F00F0404C /* Frameworks */,
 				1872B9CC2D935190004DE16F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -107,6 +148,13 @@
 				1872B9E52D935193004DE16F /* Reduce AnxietyUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		18E41DD32E45ED3F00F0404C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -132,10 +180,18 @@
 				18F797902DF08BD800229907 /* AppChatView */,
 				18F797922DF08BD800229907 /* AppLoginFlow */,
 				18F797942DF08BD800229907 /* AppMainScreen */,
-				18F797962DF08BD800229907 /* AppMeditaion+Attention */,
-				18F797982DF08BD800229907 /* AppTabBar */,
 				18F7979B2DF09A2F00229907 /* AppOnboarding */,
-				18F7979D2DF09A2F00229907 /* AppTabBar */,
+				18E41DD82E45F6B700F0404C /* AppProgressModel */,
+				18E41DDA2E46836D00F0404C /* AppNotePad */,
+				18E41DE92E468F0300F0404C /* AppMeditationAttention */,
+				1867BD972E6B8820001DF909 /* AppChatView */,
+				1867BD992E6B8820001DF909 /* AppLoginFlow */,
+				1867BD9B2E6B8820001DF909 /* AppMainScreen */,
+				1867BD9D2E6B8820001DF909 /* AppMeditationAttention */,
+				1867BD9F2E6B8820001DF909 /* AppNotePad */,
+				1867BDA12E6B8820001DF909 /* AppOnboarding */,
+				1867BDA32E6B8820001DF909 /* AppProgressModel */,
+				1867BDA52E6B8820001DF909 /* AppPsychologistChat */,
 			);
 			productName = "Reduce Anxiety";
 			productReference = 1872B9CB2D935190004DE16F /* Reduce Anxiety.app */;
@@ -220,7 +276,7 @@
 			mainGroup = 1872B9C22D935190004DE16F;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				18F7979A2DF09A2F00229907 /* XCLocalSwiftPackageReference "../Reduce-Anxiety" */,
+				1867BD962E6B8820001DF909 /* XCLocalSwiftPackageReference "../Reduce-Anxiety" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1872B9CC2D935190004DE16F /* Products */;
@@ -587,13 +643,57 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		18F7979A2DF09A2F00229907 /* XCLocalSwiftPackageReference "../Reduce-Anxiety" */ = {
+		1867BD962E6B8820001DF909 /* XCLocalSwiftPackageReference "../Reduce-Anxiety" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = "../Reduce-Anxiety";
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1867BD972E6B8820001DF909 /* AppChatView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppChatView;
+		};
+		1867BD992E6B8820001DF909 /* AppLoginFlow */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppLoginFlow;
+		};
+		1867BD9B2E6B8820001DF909 /* AppMainScreen */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppMainScreen;
+		};
+		1867BD9D2E6B8820001DF909 /* AppMeditationAttention */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppMeditationAttention;
+		};
+		1867BD9F2E6B8820001DF909 /* AppNotePad */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppNotePad;
+		};
+		1867BDA12E6B8820001DF909 /* AppOnboarding */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppOnboarding;
+		};
+		1867BDA32E6B8820001DF909 /* AppProgressModel */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppProgressModel;
+		};
+		1867BDA52E6B8820001DF909 /* AppPsychologistChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppPsychologistChat;
+		};
+		18E41DD82E45F6B700F0404C /* AppProgressModel */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppProgressModel;
+		};
+		18E41DDA2E46836D00F0404C /* AppNotePad */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppNotePad;
+		};
+		18E41DE92E468F0300F0404C /* AppMeditationAttention */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppMeditationAttention;
+		};
 		18F797902DF08BD800229907 /* AppChatView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AppChatView;
@@ -606,21 +706,9 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = AppMainScreen;
 		};
-		18F797962DF08BD800229907 /* AppMeditaion+Attention */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = "AppMeditaion+Attention";
-		};
-		18F797982DF08BD800229907 /* AppTabBar */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = AppTabBar;
-		};
 		18F7979B2DF09A2F00229907 /* AppOnboarding */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AppOnboarding;
-		};
-		18F7979D2DF09A2F00229907 /* AppTabBar */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = AppTabBar;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

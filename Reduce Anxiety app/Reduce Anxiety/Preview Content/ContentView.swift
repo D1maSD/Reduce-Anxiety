@@ -10,12 +10,15 @@ import AppMainScreen
 import AppTabBar
 import AppChatView
 import AppOnboarding
-import AppMeditaion_Attention
-
+import AppMeditationAttention
+import AppProgressModel
+import AppNotePad
 
 struct ContentView: View {
     @State private var selectedTab: Tabs = .plus
     @State private var isInChatDetail: Bool = false
+    @StateObject var progressModel = AppProgressModel()
+
     var body: some View {
         ZStack(alignment: .bottom) {
             viewForSelectedTab()
@@ -34,14 +37,17 @@ struct ContentView: View {
         switch selectedTab {
         case .home:
             HomeView()
+                .environmentObject(progressModel)
         case .check:
             MeditationsView()
+                .environmentObject(progressModel)
         case .plus:
             TasksView()
+                .environmentObject(progressModel)
         case .chat:
             ChatsView($isInChatDetail)
         case .profile:
-            Text("Profile View")
+            ProfileView()
         }
     }
 }

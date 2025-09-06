@@ -6,22 +6,28 @@
 //
 
 import SwiftUI
+import AppProgressModel
 
 // MARK: - Модель записи
-struct Note: Identifiable {
-    let id = UUID()
+struct Note: Identifiable, Codable {
+    let id: UUID
     var date: Date
     var text: String
-}
 
+    init(id: UUID = UUID(), date: Date, text: String) {
+        self.id = id
+        self.date = date
+        self.text = text
+    }
+}
 // MARK: - Основной экран задач
-struct TasksView: View {
+public struct TasksView: View {
     @State private var selectedDate: Date? = nil
     @State private var showingCreateNote = false
     @State private var pendingNoteDate: Date? = nil
-
+    @EnvironmentObject var progressModel: AppProgressModel
     // 🔹 Переключение между режимами: мок и обычный
-    private let isMockMode = true
+    private let isMockMode = false
 
     private let totalCalendarDays = 92
     private let today = Calendar.current.startOfDay(for: Date())
@@ -36,13 +42,13 @@ struct TasksView: View {
 
     @State private var notes: [Note] = []
 
-    init() {
+    public init() {
         if isMockMode {
             _notes = State(initialValue: Self.mockNotes())
         }
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationView {
             VStack(spacing: 16) {
                 // Header with missed days
@@ -56,6 +62,7 @@ struct TasksView: View {
                     HStack {
                         Text(formattedDate(today))
                             .font(.system(size: 26, weight: .bold))
+                            .foregroundColor(.black)
                         Spacer()
                         Text("You missed \(missedDays) days")
                             .foregroundColor(.red)
@@ -103,6 +110,7 @@ struct TasksView: View {
                         var note = newNote
                         note.date = pendingDate
                         notes.append(note)
+                        progressModel.recordNote(on: note.date) // 👈 фиксируем в модели
                         showingCreateNote = false
                         pendingNoteDate = nil
                     }

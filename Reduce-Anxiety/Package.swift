@@ -22,8 +22,8 @@ let package = Package(
                    name: "AppMainScreen",
                    targets: ["AppMainScreen"]),
         .library(
-                   name: "AppMeditaion+Attention",
-                   targets: ["AppMeditaion+Attention"]),
+                   name: "AppMeditationAttention",
+                   targets: ["AppMeditationAttention"]),
         .library(
                    name: "AppOnboarding",
                    targets: ["AppOnboarding"]),
@@ -32,7 +32,11 @@ let package = Package(
                    targets: ["AppPsychologistChat"]),
         .library(
                    name: "AppNotePad",
-                   targets: ["AppNotePad"])
+                   targets: ["AppNotePad"]),
+        .library(
+                   name: "AppProgressModel",
+                   targets: ["AppProgressModel"])
+        
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -42,10 +46,20 @@ let package = Package(
             name: "AppTabBar"),
         .target(
             name: "AppLoginFlow"),
+        
         .target(
-            name: "AppMainScreen"),
+            name: "AppMainScreen",
+            dependencies: [
+                
+                "AppMeditationAttention"
+            ]
+        ),
         .target(
-            name: "AppMeditaion+Attention"),
+            name: "AppMeditationAttention",
+            dependencies: [
+                "AppProgressModel"
+            ]
+        ),
         .target(
             name: "AppPsychologistChat"),
         .target(
@@ -53,7 +67,17 @@ let package = Package(
         .target(
             name: "AppOnboarding"),
         .target(
-            name: "AppNotePad")
-        
+            name: "AppNotePad",
+            dependencies: [
+                "AppProgressModel"
+            ]
+        ),
+        .target(
+            name: "AppProgressModel",
+            dependencies: [
+            
+            
+            ]
+        ),
     ]
 )

@@ -6,71 +6,112 @@
 //
 
 import SwiftUI
-import AppMeditaion_Attention
-
+import UIKit
+import AppMeditationAttention
+import AppProgressModel
 
 public struct HomeView: View {
     @State private var isGridMode = false
     @State private var selectedFilter: String = "Today"
-    @State private var path = NavigationPath() // ← For NavigationStack
+    @State private var path = NavigationPath()
+    @State private var showFilterMenu = false
+    @State private var navigateToNotifications = false
+    @EnvironmentObject var progressModel: AppProgressModel
 
+    let bigSize = UIDevice.current.userInterfaceIdiom == .pad
     public init() {}
 
     public var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 0) {
-                HStack {
-                    Text("Current progress")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.black)
-                    Spacer()
-                    Button(action: { isGridMode.toggle() }) {
-                        Image(systemName: "square.grid.2x2")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.black)
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-
-                if isGridMode {
-                    filterButtons
-                        .padding(.top, 12)
-                    ScrollView {
-                        LazyVStack(spacing: 20) {
-                            ForEach(0..<(selectedFilter == "Today" ? 1 : selectedFilter == "Last 7 days" ? 7 : 20), id: \.self) { _ in
+            ZStack(alignment: .topTrailing) {
+                Group {
+                    if isGridMode {
+                        VStack(spacing: 0) {
+                            filterButtons
+                                .padding(.top, 12)
+                            ScrollView {
+                                LazyVStack(spacing: 20) {
+                                    ForEach(0..<(selectedFilter == "Today" ? 1 : selectedFilter == "Last 7 days" ? 7 : 20), id: \.self) { _ in
+                                        DailyAdviceCell()
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.top, 12)
+                            }
+                        }
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 20) {
+                                ProgressAndContributionsCell()
+                                    .environmentObject(progressModel)
                                 DailyAdviceCell()
+                                Button(action: {
+                                    path.append("meditations")
+                                }) {
+                                    HowPassCourseCell()
+                                }
                             }
+                            .padding(.horizontal, 20)
+                            .padding(.top, 12)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 12)
-                    }
-                } else {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            ProgressAndContributionsCell()
-                            DailyAdviceCell()
-                            
-                            // ✅ Wrap HowPassCourseCell in a Button
-                            Button(action: {
-                                path.append("meditations") // ← push by value
-                            }) {
-                                HowPassCourseCell()
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 12)
                     }
                 }
-                Spacer()
-            }
-            .background(Color.white.edgesIgnoringSafeArea(.all))
-            .navigationDestination(for: String.self) { route in
-                if route == "meditations" {
-                    MeditationsView()
+                .navigationTitle("Current progress")
+                .navigationBarTitleDisplayMode(.large)
+                .navigationDestination(for: String.self) { route in
+                    if route == "meditations" {
+                        MeditationsView()
+                            .environmentObject(progressModel)
+                    } else if route == "notifications" {
+//                        NotificationsView()
+                        MeditationsView()
+                            .environmentObject(progressModel)
+                    }
+                }
+
+                if showFilterMenu {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Button("Days") {
+                            isGridMode.toggle()
+                            showFilterMenu = false
+                        }
+                        .padding(.vertical, 6)
+                        .padding(.horizontal)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button("Notifications") {
+                            showFilterMenu = false
+                            path.append("notifications")
+                        }
+                        .padding(.vertical, 6)
+                        .padding(.horizontal)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(radius: 5)
+                    .frame(width: UIScreen.main.bounds.width * 0.3)
+                    .padding(.top, 60)
+                    .padding(.trailing, 12)
+                    .zIndex(1)
                 }
             }
-            .navigationBarHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showFilterMenu.toggle()
+                    }) {
+                        if let uiImage = UIImage(named: "filter") {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: bigSize ? 30 : 30)
+                                .padding(.top, 40)
+                        }
+                    }
+                }
+            }
+            .background(Color.white)
         }
     }
 
@@ -96,7 +137,10 @@ public struct HomeView: View {
     }
 }
 
+
 struct CurrentProgressContent: View {
+    @EnvironmentObject var progressModel: AppProgressModel
+
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
             ZStack {
@@ -110,35 +154,26 @@ struct CurrentProgressContent: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Completed sessions:")
-                        .font(.system(size: 16))
-                        .foregroundColor(.black)
                     Spacer()
-                    Text("30")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.black)
+                    Text("\(progressModel.totalMeditations)")
                 }
                 HStack {
                     Text("Meditations passed:")
-                        .font(.system(size: 16))
-                        .foregroundColor(.black)
                     Spacer()
-                    Text("30")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.black)
+                    Text("\(progressModel.totalMeditations)")
                 }
                 HStack {
                     Text("Notes maked:")
-                        .font(.system(size: 16))
-                        .foregroundColor(.black)
                     Spacer()
-                    Text("30")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.black)
+                    Text("\(progressModel.totalNotes)")
                 }
             }
+            .font(.system(size: 16))
+            .foregroundColor(.black)
         }
     }
 }
+
 
 struct DailyContributionsContent: View {
     let rows = 7
@@ -146,6 +181,10 @@ struct DailyContributionsContent: View {
     let cellSize: CGFloat = 20
     let spacing: CGFloat = 4
     let contributions: [Bool] = (0..<84).map { _ in Bool.random() }
+    @EnvironmentObject var progressModel: AppProgressModel
+    private var dailyData: [DailyActivity] {
+            progressModel.activities(forLastDays: 84)
+        }
 
     private var monthLabels: [Int: String] {
         var labels: [Int: String] = [:]
@@ -181,22 +220,36 @@ struct DailyContributionsContent: View {
                         }
                     }
                     HStack(spacing: spacing) {
-                        ForEach(0..<columns, id: \.self) { column in
-                            VStack(spacing: spacing) {
-                                ForEach(0..<rows, id: \.self) { row in
-                                    let index = column * rows + row
-                                    Rectangle()
-                                        .fill(index < contributions.count && contributions[index] ? Color.green : Color.gray.opacity(0.3))
-                                        .frame(width: cellSize, height: cellSize)
-                                        .cornerRadius(4)
-                                }
-                            }
-                        }
-                    }
+                                            ForEach(0..<columns, id: \.self) { column in
+                                                VStack(spacing: spacing) {
+                                                    ForEach(0..<rows, id: \.self) { row in
+                                                        let index = column * rows + row
+                                                        if index < dailyData.count {
+                                                            let activity = dailyData[index]
+                                                            Rectangle()
+                                                                .fill(color(for: activity))
+                                                                .frame(width: cellSize, height: cellSize)
+                                                                .cornerRadius(4)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                 }
             }
         }
     }
+    
+    private func color(for activity: DailyActivity) -> Color {
+        if activity.hasNote && activity.hasMeditation {
+            return Color.green.opacity(0.8) // темно-зелёный
+        } else if activity.hasNote || activity.hasMeditation {
+            return Color.green.opacity(0.4) // светло-зелёный
+        } else {
+            return Color.gray.opacity(0.2)
+        }
+    }
+
 }
 
 struct DailyAdviceCell: View {
@@ -286,10 +339,13 @@ struct SquareViewItems: View {
 }
 
 struct ProgressAndContributionsCell: View {
+    @EnvironmentObject var progressModel: AppProgressModel
     var body: some View {
         VStack(spacing: 20) {
             CurrentProgressContent()
+                .environmentObject(progressModel)
             DailyContributionsContent()
+                .environmentObject(progressModel)
         }
         .padding(20)
         .background(Color.yellow.opacity(0.2))

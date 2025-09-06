@@ -17,76 +17,91 @@ struct Chat: Identifiable {
 public struct ChatsView: View {
     @State private var selectedChat: Chat? = nil
     @Binding var isInChatDetail: Bool
+
     private let chats = [
         Chat(userName: "Philip", lastMessage: "Thank you! That was very helpful!", userImageName: "person.circle"),
         Chat(userName: "Vera Lisyk", lastMessage: "I’m here if you want to talk.", userImageName: "person.circle")
     ]
+
     public init(_ isInChatDetail: Binding<Bool>) {
         self._isInChatDetail = isInChatDetail
     }
+
     public var body: some View {
-        NavigationView {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("You can also make answer to our AI Psychologist, learned by real psychologist, or answer for psychologist on real chat")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding()
+        NavigationStack {
+            List {
+                // Верхний текст в секции с белым фоном
+                Section {
+                    Text("You can also make answer to our AI Psychologist, learned by real psychologist, or answer for psychologist on real chat")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.vertical, 8)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .background(Color.white)
+                }
+                .listRowBackground(Color.white) // фон всей строки — белый
+                .background(Color.white)        // фон секции — белый
 
-                List(chats) { chat in
-                    Button(action: {
-                        selectedChat = chat
-                        isInChatDetail = true
-                    }) {
-                        HStack(spacing: 16) {
-                            Image(systemName: chat.userImageName)
-                                .resizable()
-                                .frame(width: 50, height: 50)
-                                .clipShape(Circle())
-                                .padding(.vertical, 8)
+                // Чаты
+                Section {
+                    ForEach(chats) { chat in
+                        Button(action: {
+                            selectedChat = chat
+                            isInChatDetail = true
+                        }) {
+                            HStack(spacing: 16) {
+                                Image(systemName: chat.userImageName)
+                                    .resizable()
+                                    .frame(width: 50, height: 50)
+                                    .clipShape(Circle())
+                                    .padding(.vertical, 8)
 
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(chat.userName)
-                                    .font(.headline)
-                                    .foregroundColor(chat.userName == "Philip" ? .white : .primary) // 👈 белый только у Philip
-                                Text(chat.lastMessage)
-                                    .font(.subheadline)
-                                    .lineLimit(1)
-                                    .foregroundColor(.gray)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(chat.userName)
+                                        .font(.headline)
+                                        .foregroundColor(chat.userName == "Philip" ? .white : .primary)
+                                    Text(chat.lastMessage)
+                                        .font(.subheadline)
+                                        .lineLimit(1)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .padding()
+                            .background(Color.green)
+                            .cornerRadius(8)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
+                    }
+                }
+            }
+            .listStyle(.plain)
+            .navigationTitle("Chats")
+            .navigationBarTitleDisplayMode(.large)
+            .background(Color.white.ignoresSafeArea())
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar) // 👈 блюр фона навбара
+            .toolbarBackground(.visible, for: .navigationBar)            // 👈 делает его видимым
+            .background(
+                NavigationLink(
+                    destination: ChatDetailView(chat: selectedChat, isInChatDetail: $isInChatDetail),
+                    isActive: Binding(
+                        get: { selectedChat != nil },
+                        set: {
+                            if !$0 {
+                                selectedChat = nil
+                                isInChatDetail = false
                             }
                         }
-                        .padding()
-                        .background(Color.green) // 👈 зелёный фон ячейки
-                        .cornerRadius(8)
-                    }
-                    .buttonStyle(PlainButtonStyle()) // Убирает синий эффект кнопки
-                }
-                .listRowSeparator(.hidden) // убирает разделители между ячейками
-                .listRowBackground(Color.clear) // убирает системный фон ячее
-                .listStyle(PlainListStyle())
-                .navigationTitle("Chats")
-
-                .background(
-                               NavigationLink(
-                                   destination: ChatDetailView(chat: selectedChat, isInChatDetail: $isInChatDetail),
-                                   isActive: Binding(
-                                       get: { selectedChat != nil },
-                                       set: {
-                                           if !$0 {
-                                               selectedChat = nil
-                                               isInChatDetail = false // 👈 возвращаем таббар обратно
-                                           }
-                                       }
-                                   ),
-                                   label: { EmptyView() }
-                               )
-                               .hidden()
-                           )
-            }
-            .background(Color.white.ignoresSafeArea())
+                    ),
+                    label: { EmptyView() }
+                )
+                .hidden()
+            )
         }
     }
 }
-
 #Preview {
     StatefulPreviewWrapper(false) { binding in
         ChatsView(binding)
