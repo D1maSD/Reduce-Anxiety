@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import AppProgressModel
 
 // MARK: - Модель записи
 public struct Note: Identifiable, Codable {

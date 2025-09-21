@@ -7,20 +7,6 @@
 
 import SwiftUI
 import AppProgressModel
-// MARK: - Models
-
-public struct Meditation: Identifiable {
-    public let id = UUID()
-    public let title: String
-    public let subtitle: String
-    public let imageName: String
-    
-    public init(title: String, subtitle: String, imageName: String) {
-        self.title = title
-        self.subtitle = subtitle
-        self.imageName = imageName
-    }
-}
 
 enum GuideOption: String, CaseIterable, Identifiable {
     case jonathan = "Jonathan"
@@ -50,12 +36,6 @@ enum DurationOption: String, CaseIterable, Identifiable {
 // MARK: - MeditationsView
 
 public struct MeditationsView: View {
-    let meditations = [
-        Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "meditation1"),
-        Meditation(title: "Best sides of yourself", subtitle: "Focus your mind", imageName: "meditation2"),
-        Meditation(title: "Santosha", subtitle: "Focus your mind", imageName: "meditation2"),
-        Meditation(title: "Focus mind meditation", subtitle: "Focus your mind", imageName: "meditation2")
-    ]
     @EnvironmentObject var progressModel: AppProgressModel
     public init() {}
 
@@ -64,7 +44,7 @@ public struct MeditationsView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     Color.clear.frame(height: 0)
-                    ForEach(meditations) { meditation in
+                    ForEach(Meditation.coreMeditations) { meditation in
                         NavigationLink(destination:
                         MeditationDetailView(meditation: meditation)
                             .environmentObject(progressModel)
@@ -105,8 +85,12 @@ public struct MeditationsView: View {
 
 // MARK: - MeditationDetailView
 
-struct MeditationDetailView: View {
-    let meditation: Meditation
+public struct MeditationDetailView: View {
+    public let meditation: Meditation
+    
+    public init(meditation: Meditation) {
+        self.meditation = meditation
+    }
     @State private var showOptionsSheet = false
     @State private var showGuideSheet = false
     @State private var showMediaOptions = false
@@ -114,7 +98,7 @@ struct MeditationDetailView: View {
     @State private var selectedGuide: GuideOption = .jonathan
     @State private var selectedDuration: DurationOption = .eleven
     @EnvironmentObject var progressModel: AppProgressModel
-    var body: some View {
+    public var body: some View {
         ZStack {
             Color.defaultAppDark.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 16) {
@@ -213,7 +197,8 @@ struct MeditationDetailView: View {
             }
         }
         .sheet(isPresented: $showOptionsSheet) {
-            OptionsBottomSheet()
+            OptionsBottomSheet(meditation: meditation)
+                .environmentObject(progressModel)
         }
         .sheet(isPresented: $showGuideSheet) {
             GuideBottomSheetView(selectedGuide: $selectedGuide)
@@ -260,6 +245,10 @@ struct MeditationsView_Previews: PreviewProvider {
 }
 
 struct OptionsBottomSheet: View {
+    let meditation: Meditation
+    @EnvironmentObject var progressModel: AppProgressModel
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         VStack(spacing: 0) {
             Capsule()
@@ -268,17 +257,17 @@ struct OptionsBottomSheet: View {
                 .padding(.top, 10)
 
             HStack(spacing: 12) {
-                Image("meditation_cover")
+                Image(meditation.imageName)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 50, height: 50)
                     .cornerRadius(10)
 
                 VStack(alignment: .leading) {
-                    Text("Psalm 6: Distress")
+                    Text(meditation.title)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
-                    Text("Minute Psalm · 2 min")
+                    Text(meditation.subtitle)
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                 }
@@ -289,7 +278,7 @@ struct OptionsBottomSheet: View {
             VStack(spacing: 0) {
                 ForEach(optionItems, id: \.self) { item in
                     Button {
-                        // handle action
+                        handleOptionAction(item)
                     } label: {
                         HStack(spacing: 16) {
                             Image(systemName: item.icon)
@@ -310,6 +299,31 @@ struct OptionsBottomSheet: View {
         .padding(.bottom, 16)
         .background(Color.defaultAppDark)
         .cornerRadius(30, corners: [.topLeft, .topRight])
+    }
+    
+    private func handleOptionAction(_ item: OptionItem) {
+        switch item.title {
+        case "Download Audio":
+            progressModel.meditationManager.downloadMeditation(meditation)
+            dismiss()
+        case "Add to Routine":
+            progressModel.meditationManager.addToRoutine(meditation)
+            // Navigate to edit routine screen
+            dismiss()
+        case "Favorite":
+            if progressModel.meditationManager.isFavorite(meditation) {
+                progressModel.meditationManager.removeFromFavorites(meditation)
+            } else {
+                progressModel.meditationManager.addToFavorites(meditation)
+            }
+            dismiss()
+        case "Play":
+            // Mark as recently played and handle play
+            progressModel.meditationManager.markAsPlayed(meditation)
+            dismiss()
+        default:
+            dismiss()
+        }
     }
 
     struct OptionItem: Identifiable {

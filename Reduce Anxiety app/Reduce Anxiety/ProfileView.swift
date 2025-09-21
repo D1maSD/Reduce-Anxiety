@@ -7,6 +7,7 @@
 import SwiftUI
 import AppChatView
 import AppMeditationAttention
+import AppProgressModel
 import UserNotifications
 
 
@@ -28,6 +29,10 @@ struct ProfileView: View {
     @State private var selectedStub: String?
     @State private var navigateToRoutineEditor = false
     @State private var navigateToOptimalRoutine = false
+    @State private var navigateToDownloads = false
+    @State private var navigateToFavorites = false
+    @State private var navigateToRecentlyPlayed = false
+    @EnvironmentObject var progressModel: AppProgressModel
 
     let routineCards = [
         ("Create Your Own Routine", "Get Started"),
@@ -156,7 +161,7 @@ struct ProfileView: View {
                                                     .foregroundColor(.white)
                                                 Spacer()
                                                 Button {
-                                                    selectedStub = "Downloads"
+                                                    navigateToDownloads = true
                                                 } label: {
                                                     Image(systemName: "chevron.right")
                                                         .foregroundColor(.white)
@@ -164,21 +169,35 @@ struct ProfileView: View {
                                             }
                                             .padding(.horizontal)
 
-                                            TabView {
-                                                RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color.defaultAppGray)
-                                                    .frame(width: UIScreen.main.bounds.width - 40, height: 180)
-                                                    .overlay(
-                                                        Image(systemName: "arrow.down.circle.fill")
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: 40, height: 40)
-                                                            .foregroundColor(.white)
-                                                    )
-                                                    .padding(.horizontal, 20)
+                                            if progressModel.meditationManager.downloadedMeditations.isEmpty {
+                                                TabView {
+                                                    RoundedRectangle(cornerRadius: 20)
+                                                        .fill(Color.defaultAppGray)
+                                                        .frame(width: UIScreen.main.bounds.width - 40, height: 180)
+                                                        .overlay(
+                                                            Image(systemName: "arrow.down.circle.fill")
+                                                                .resizable()
+                                                                .scaledToFit()
+                                                                .frame(width: 40, height: 40)
+                                                                .foregroundColor(.white)
+                                                        )
+                                                        .padding(.horizontal, 20)
+                                                }
+                                                .frame(height: 200)
+                                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                                            } else {
+                                                TabView {
+                                                    ForEach(progressModel.meditationManager.downloadedMeditations.prefix(3)) { downloadedMeditation in
+                                                        NavigationLink(destination: MeditationDetailView(meditation: downloadedMeditation.meditation)
+                                                            .environmentObject(progressModel)) {
+                                                            DownloadedMeditationCard(meditation: downloadedMeditation.meditation)
+                                                        }
+                                                        .buttonStyle(PlainButtonStyle())
+                                                    }
+                                                }
+                                                .frame(height: 200)
+                                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
                                             }
-                                            .frame(height: 200)
-                                            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                                         }
 
                                         // Recently Played Section
@@ -189,7 +208,7 @@ struct ProfileView: View {
                                                     .foregroundColor(.white)
                                                 Spacer()
                                                 Button {
-                                                    selectedStub = "Recently Played"
+                                                    navigateToRecentlyPlayed = true
                                                 } label: {
                                                     Image(systemName: "chevron.right")
                                                         .foregroundColor(.white)
@@ -197,24 +216,38 @@ struct ProfileView: View {
                                             }
                                             .padding(.horizontal)
 
-                                            TabView {
-                                                RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color.defaultAppGray)
-                                                    .frame(width: UIScreen.main.bounds.width - 40, height: 180)
-                                                    .overlay(
-                                                        Image(systemName: "clock.fill")
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: 40, height: 40)
-                                                            .foregroundColor(.white)
-                                                    )
-                                                    .padding(.horizontal, 20)
+                                            if progressModel.meditationManager.recentlyPlayedMeditations.isEmpty {
+                                                TabView {
+                                                    RoundedRectangle(cornerRadius: 20)
+                                                        .fill(Color.defaultAppGray)
+                                                        .frame(width: UIScreen.main.bounds.width - 40, height: 180)
+                                                        .overlay(
+                                                            Image(systemName: "clock.fill")
+                                                                .resizable()
+                                                                .scaledToFit()
+                                                                .frame(width: 40, height: 40)
+                                                                .foregroundColor(.white)
+                                                        )
+                                                        .padding(.horizontal, 20)
+                                                }
+                                                .frame(height: 200)
+                                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                                            } else {
+                                                TabView {
+                                                    ForEach(progressModel.meditationManager.recentlyPlayedMeditations.prefix(3)) { meditation in
+                                                        NavigationLink(destination: MeditationDetailView(meditation: meditation)
+                                                            .environmentObject(progressModel)) {
+                                                            DownloadedMeditationCard(meditation: meditation)
+                                                        }
+                                                        .buttonStyle(PlainButtonStyle())
+                                                    }
+                                                }
+                                                .frame(height: 200)
+                                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
                                             }
-                                            .frame(height: 200)
-                                            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                                         }
 
-                                        // Favorites Section (оставлена без изменений)
+                                        // Favorites Section
                                         VStack(alignment: .leading, spacing: 12) {
                                             HStack {
                                                 Text("Your favorite practices")
@@ -222,7 +255,7 @@ struct ProfileView: View {
                                                     .foregroundColor(.defaultWhite)
                                                 Spacer()
                                                 Button {
-                                                    selectedStub = "Favorites"
+                                                    navigateToFavorites = true
                                                 } label: {
                                                     Image(systemName: "chevron.right")
                                                         .foregroundColor(.gray)
@@ -230,21 +263,35 @@ struct ProfileView: View {
                                             }
                                             .padding(.horizontal)
 
-                                            TabView {
-                                                RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color.defaultAppGray)
-                                                    .frame(width: UIScreen.main.bounds.width - 40, height: 180)
-                                                    .overlay(
-                                                        Image(systemName: "star.fill")
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: 40, height: 40)
-                                                            .foregroundColor(.defaultAppWhite)
-                                                    )
-                                                    .padding(.horizontal, 20)
+                                            if progressModel.meditationManager.favoriteMeditations.isEmpty {
+                                                TabView {
+                                                    RoundedRectangle(cornerRadius: 20)
+                                                        .fill(Color.defaultAppGray)
+                                                        .frame(width: UIScreen.main.bounds.width - 40, height: 180)
+                                                        .overlay(
+                                                            Image(systemName: "star.fill")
+                                                                .resizable()
+                                                                .scaledToFit()
+                                                                .frame(width: 40, height: 40)
+                                                                .foregroundColor(.defaultAppWhite)
+                                                        )
+                                                        .padding(.horizontal, 20)
+                                                }
+                                                .frame(height: 200)
+                                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                                            } else {
+                                                TabView {
+                                                    ForEach(progressModel.meditationManager.favoriteMeditations.prefix(3)) { meditation in
+                                                        NavigationLink(destination: MeditationDetailView(meditation: meditation)
+                                                            .environmentObject(progressModel)) {
+                                                            DownloadedMeditationCard(meditation: meditation)
+                                                        }
+                                                        .buttonStyle(PlainButtonStyle())
+                                                    }
+                                                }
+                                                .frame(height: 200)
+                                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
                                             }
-                                            .frame(height: 200)
-                                            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                                         }
 
                                         Spacer().frame(height: 40)
@@ -257,6 +304,18 @@ struct ProfileView: View {
                                 }
                                 .navigationDestination(isPresented: $navigateToOptimalRoutine) {
                                     OptimalRoutineView()
+                                }
+                                .navigationDestination(isPresented: $navigateToDownloads) {
+                                    DownloadsView()
+                                        .environmentObject(progressModel)
+                                }
+                                .navigationDestination(isPresented: $navigateToFavorites) {
+                                    FavoritesView()
+                                        .environmentObject(progressModel)
+                                }
+                                .navigationDestination(isPresented: $navigateToRecentlyPlayed) {
+                                    RecentlyPlayedView()
+                                        .environmentObject(progressModel)
                                 }
                                 .navigationDestination(isPresented: $navigateToSettings) {
                                     SettingsMainView()
@@ -690,13 +749,10 @@ struct EditYourRoutineView: View {
     @State private var showTimeCarousel = false
     @StateObject private var notificationManager = NotificationManager.shared
     
-    // Sample suggested meditations
-    let suggestedMeditations = [
-        Meditation(title: "Daily Trivia", subtitle: "Learn about the faith", imageName: "daily_trivia"),
-        Meditation(title: "The Word", subtitle: "Solve the word of the day and learn more about your faith!", imageName: "the_word"),
-        Meditation(title: "Daily Rosary", subtitle: "Daily Mysteries", imageName: "daily_rosary"),
-        Meditation(title: "Divine Revelation", subtitle: "Part 1, Section 1", imageName: "divine_revelation")
-    ]
+    // Sample suggested meditations - using the unified model
+    let suggestedMeditations = Meditation.allMeditations.filter { meditation in
+        !Meditation.coreMeditations.contains { $0.id == meditation.id }
+    }.prefix(4).map { $0 }
 
     var body: some View {
         NavigationStack {
@@ -1115,21 +1171,8 @@ struct TopRoutineResultsView: View {
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
     
-    // Extended meditation list based on the screenshot
-    let allMeditations = [
-        Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "love_to_body"),
-        Meditation(title: "Daily Trivia", subtitle: "Learn about the faith", imageName: "daily_trivia"),
-        Meditation(title: "The Word", subtitle: "Solve the word of the day and learn more about your faith!", imageName: "the_word"),
-        Meditation(title: "Daily Rosary", subtitle: "Daily Mysteries • 7 sessions", imageName: "daily_rosary"),
-        Meditation(title: "Divine Revelation", subtitle: "Part 1, Section 1 • 25 sessions", imageName: "divine_revelation"),
-        Meditation(title: "Rosary", subtitle: "Dr. Scott Hahn • 7 sessions", imageName: "rosary"),
-        Meditation(title: "Daily Reflections", subtitle: "Jeff Cavins & Jonathan Roumie • 1415 sessions", imageName: "daily_reflections"),
-        Meditation(title: "Daily Gospel", subtitle: "Daily Lectio Divina • 2136 sessions", imageName: "daily_gospel"),
-        Meditation(title: "Morning Psalms", subtitle: "Bishop Barron • 28 sessions", imageName: "morning_psalms"),
-        Meditation(title: "Daily Mass Readings", subtitle: "Listen & Pray • 1439 sessions", imageName: "daily_mass_readings"),
-        Meditation(title: "Daily Saint", subtitle: "Pray with the Saints • 262 sessions", imageName: "daily_saint"),
-        Meditation(title: "Gospel of Matthew", subtitle: "Biblical Study • 45 sessions", imageName: "gospel_matthew")
-    ]
+    // Using the unified meditation model
+    let allMeditations = Meditation.allMeditations
     
     var filteredMeditations: [Meditation] {
         if searchText.isEmpty {
@@ -1375,5 +1418,370 @@ struct TimePickerCarousel: View {
             Spacer()
         }
         .background(Color.defaultAppDark.ignoresSafeArea())
+    }
+}
+
+// MARK: - DownloadedMeditationCard
+struct DownloadedMeditationCard: View {
+    let meditation: Meditation
+    
+    var body: some View {
+        RoundedRectangle(cornerRadius: 20)
+            .fill(Color.defaultAppGray)
+            .frame(width: UIScreen.main.bounds.width - 40, height: 180)
+            .overlay(
+                VStack(spacing: 12) {
+                    // Meditation Icon
+                    Circle()
+                        .fill(meditationIconColor(for: meditation.title))
+                        .frame(width: 60, height: 60)
+                        .overlay(
+                            meditationIcon(for: meditation.title)
+                                .foregroundColor(.white)
+                                .font(.system(size: 24))
+                        )
+                    
+                    VStack(spacing: 4) {
+                        Text(meditation.title)
+                            .font(.title3.bold())
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                        
+                        Text(meditation.subtitle)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                    }
+                }
+                .padding()
+            )
+            .padding(.horizontal, 20)
+    }
+    
+    private func meditationIconColor(for title: String) -> Color {
+        switch title {
+        case "Love to body":
+            return .pink
+        case "Best sides of yourself":
+            return .blue
+        case "Santosha":
+            return .green
+        case "Focus mind meditation":
+            return .purple
+        case "Daily Trivia":
+            return .purple
+        case "The Word":
+            return .blue
+        case "Daily Rosary":
+            return .brown
+        case "Divine Revelation":
+            return .orange
+        case "Rosary":
+            return .indigo
+        case "Daily Reflections":
+            return .green
+        case "Daily Gospel":
+            return .yellow
+        case "Morning Psalms":
+            return .cyan
+        case "Daily Mass Readings":
+            return .mint
+        case "Daily Saint":
+            return .red
+        case "Gospel of Matthew":
+            return .teal
+        default:
+            return .gray
+        }
+    }
+    
+    private func meditationIcon(for title: String) -> some View {
+        switch title {
+        case "Love to body":
+            return Image(systemName: "heart.fill")
+        case "Best sides of yourself":
+            return Image(systemName: "star.fill")
+        case "Santosha":
+            return Image(systemName: "leaf.fill")
+        case "Focus mind meditation":
+            return Image(systemName: "brain.head.profile")
+        case "Daily Trivia":
+            return Image(systemName: "questionmark.circle")
+        case "The Word":
+            return Image(systemName: "textformat.abc")
+        case "Daily Rosary":
+            return Image(systemName: "cross")
+        case "Divine Revelation":
+            return Image(systemName: "book")
+        case "Rosary":
+            return Image(systemName: "pray")
+        case "Daily Reflections":
+            return Image(systemName: "lightbulb")
+        case "Daily Gospel":
+            return Image(systemName: "book.closed")
+        case "Morning Psalms":
+            return Image(systemName: "sunrise")
+        case "Daily Mass Readings":
+            return Image(systemName: "book.pages")
+        case "Daily Saint":
+            return Image(systemName: "person.2")
+        case "Gospel of Matthew":
+            return Image(systemName: "scroll")
+        default:
+            return Image(systemName: "heart")
+        }
+    }
+}
+
+// MARK: - DownloadsView
+struct DownloadsView: View {
+    @EnvironmentObject var progressModel: AppProgressModel
+    @Environment(\.dismiss) var dismiss
+    @State private var selectedMeditation: Meditation?
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.defaultAppWhite)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                    
+                    Spacer()
+                    
+                    Text("Downloads")
+                        .font(.title2.bold())
+                        .foregroundColor(.defaultAppWhite)
+                    
+                    Spacer()
+                    
+                    // Invisible button for balance
+                    Button(action: {}) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.clear)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
+                if progressModel.meditationManager.downloadedMeditations.isEmpty {
+                    // Empty state
+                    VStack(spacing: 20) {
+                        Spacer()
+                        
+                        Image(systemName: "arrow.down.circle")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(.gray)
+                        
+                        Text("No Downloads Yet")
+                            .font(.title2.bold())
+                            .foregroundColor(.defaultAppWhite)
+                        
+                        Text("Download meditations to listen offline")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                        
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Downloads list
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(progressModel.meditationManager.downloadedMeditations) { downloadedMeditation in
+                                DownloadedMeditationRow(
+                                    meditation: downloadedMeditation.meditation,
+                                    onDelete: {
+                                        progressModel.meditationManager.removeDownloadedMeditation(downloadedMeditation.meditation)
+                                    },
+                                    onTap: {
+                                        selectedMeditation = downloadedMeditation.meditation
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 20)
+                    }
+                }
+            }
+            .background(Color.defaultAppDark.ignoresSafeArea())
+            .navigationBarHidden(true)
+            .navigationDestination(item: $selectedMeditation) { meditation in
+                MeditationDetailView(meditation: meditation)
+                    .environmentObject(progressModel)
+            }
+        }
+    }
+}
+
+// MARK: - DownloadedMeditationRow
+struct DownloadedMeditationRow: View {
+    let meditation: Meditation
+    let onDelete: () -> Void
+    let onTap: () -> Void
+    @State private var offset: CGFloat = 0
+    
+    var body: some View {
+        ZStack {
+            // Delete button background (only visible when swiped)
+            HStack {
+                Spacer()
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .medium))
+                        .frame(width: 60, height: 60)
+                        .background(Color.red)
+                        .cornerRadius(12)
+                }
+                .opacity(offset < -20 ? 1 : 0)
+            }
+            .padding(.trailing, 16)
+            
+            // Main content
+            HStack(spacing: 16) {
+                // Meditation Icon
+                Circle()
+                    .fill(meditationIconColor(for: meditation.title))
+                    .frame(width: 50, height: 50)
+                    .overlay(
+                        meditationIcon(for: meditation.title)
+                            .foregroundColor(.white)
+                            .font(.system(size: 20))
+                    )
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(meditation.title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.defaultAppWhite)
+                    
+                    Text(meditation.subtitle)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                        .lineLimit(2)
+                }
+                
+                Spacer()
+                
+                // Duration if available
+                if let duration = meditation.duration {
+                    Text("\(duration) min")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.gray)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.defaultAppGray)
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.defaultAppGray)
+            .cornerRadius(12)
+            .offset(x: offset)
+            .onTapGesture {
+                onTap()
+            }
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        if value.translation.width < 0 {
+                            offset = max(value.translation.width, -80)
+                        }
+                    }
+                    .onEnded { value in
+                        withAnimation(.spring()) {
+                            if value.translation.width < -40 {
+                                offset = -80
+                            } else {
+                                offset = 0
+                            }
+                        }
+                    }
+            )
+        }
+    }
+    
+    private func meditationIconColor(for title: String) -> Color {
+        switch title {
+        case "Love to body":
+            return .pink
+        case "Best sides of yourself":
+            return .blue
+        case "Santosha":
+            return .green
+        case "Focus mind meditation":
+            return .purple
+        case "Daily Trivia":
+            return .purple
+        case "The Word":
+            return .blue
+        case "Daily Rosary":
+            return .brown
+        case "Divine Revelation":
+            return .orange
+        case "Rosary":
+            return .indigo
+        case "Daily Reflections":
+            return .green
+        case "Daily Gospel":
+            return .yellow
+        case "Morning Psalms":
+            return .cyan
+        case "Daily Mass Readings":
+            return .mint
+        case "Daily Saint":
+            return .red
+        case "Gospel of Matthew":
+            return .teal
+        default:
+            return .gray
+        }
+    }
+    
+    private func meditationIcon(for title: String) -> some View {
+        switch title {
+        case "Love to body":
+            return Image(systemName: "heart.fill")
+        case "Best sides of yourself":
+            return Image(systemName: "star.fill")
+        case "Santosha":
+            return Image(systemName: "leaf.fill")
+        case "Focus mind meditation":
+            return Image(systemName: "brain.head.profile")
+        case "Daily Trivia":
+            return Image(systemName: "questionmark.circle")
+        case "The Word":
+            return Image(systemName: "textformat.abc")
+        case "Daily Rosary":
+            return Image(systemName: "cross")
+        case "Divine Revelation":
+            return Image(systemName: "book")
+        case "Rosary":
+            return Image(systemName: "pray")
+        case "Daily Reflections":
+            return Image(systemName: "lightbulb")
+        case "Daily Gospel":
+            return Image(systemName: "book.closed")
+        case "Morning Psalms":
+            return Image(systemName: "sunrise")
+        case "Daily Mass Readings":
+            return Image(systemName: "book.pages")
+        case "Daily Saint":
+            return Image(systemName: "person.2")
+        case "Gospel of Matthew":
+            return Image(systemName: "scroll")
+        default:
+            return Image(systemName: "heart")
+        }
     }
 }

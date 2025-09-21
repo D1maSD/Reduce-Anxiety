@@ -48,6 +48,7 @@ struct ContentView: View {
             ChatsView($isInChatDetail)
         case .profile:
             ProfileView()
+                .environmentObject(progressModel)
         }
     }
 }
