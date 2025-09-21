@@ -32,6 +32,7 @@ Additional tools for developer
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.white.opacity(0.1), lineWidth: 1)
                     )
+                    .foregroundColor(.white)
 
                 Button(action: {
                     let newNote = Note(date: Date(), text: noteText)
@@ -64,6 +65,9 @@ Additional tools for developer
                 }
             }
             .background(Color.black.ignoresSafeArea())
+            .onAppear {
+                print("CreateNoteView opened")
+            }
         }
     }
 }
@@ -94,7 +98,13 @@ struct RichTextEditor: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-        let attributed = NSMutableAttributedString(string: text)
+        let attributed = NSMutableAttributedString(
+            string: text,
+            attributes: [
+                .foregroundColor: UIColor.white,                // 👈 цвет текста
+                .font: UIFont.systemFont(ofSize: 16)            // 👈 базовый шрифт
+            ]
+        )
 
         let lines = text.components(separatedBy: "\n")
         if let firstLine = lines.first {
@@ -104,6 +114,7 @@ struct RichTextEditor: UIViewRepresentable {
 
         uiView.attributedText = attributed
     }
+
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)

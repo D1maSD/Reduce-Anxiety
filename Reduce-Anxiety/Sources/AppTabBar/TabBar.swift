@@ -30,12 +30,12 @@ public struct TabBar: View {
             Spacer()
             Button(action: { onTabSelected(.home) }) {
                 Image(systemName: "house")
-                    .foregroundColor(activeTab == .home ? .yellow : .black)
+                    .foregroundColor(activeTab == .home ? .yellow : .defaultAppWhite)
             }
             Spacer()
             Button(action: { onTabSelected(.check) }) {
                 Image(systemName: "checkmark.circle")
-                    .foregroundColor(activeTab == .check ? .yellow : .black)
+                    .foregroundColor(activeTab == .check ? .yellow : .defaultAppWhite)
             }
             Spacer()
             Button(action: { onTabSelected(.plus) }) {
@@ -50,17 +50,21 @@ public struct TabBar: View {
             Spacer()
             Button(action: { onTabSelected(.chat) }) {
                 Image(systemName: "message.fill")
-                    .foregroundColor(activeTab == .chat ? .yellow : .black)
+                    .foregroundColor(activeTab == .chat ? .yellow : .defaultAppWhite)
             }
             Spacer()
             Button(action: { onTabSelected(.profile) }) {
                 Image(systemName: "person")
-                    .foregroundColor(activeTab == .profile ? .yellow : .black)
+                    .foregroundColor(activeTab == .profile ? .yellow : .defaultAppWhite)
             }
             Spacer()
         }
         .padding()
-        .background(Color.white.shadow(radius: 2))
+        .background(
+                    Color.defaultAppGray.opacity(0.1) // прозрачный серый фон
+                        .background(.ultraThinMaterial) // системный blur как у навбара
+                        .shadow(radius: 2)
+                )
     }
 }
 // MARK: - Preview
@@ -84,4 +88,9 @@ struct StatefulPreviewWrapper<Value, Content: View>: View {
     var body: some View {
         content($value)
     }
+}
+extension Color {
+    static let defaultAppDark = Color("defaultDark")
+    static let defaultAppWhite = Color("defaultWhite")
+    static let defaultAppGray = Color("defaultGray")
 }

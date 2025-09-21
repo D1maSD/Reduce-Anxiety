@@ -6,6 +6,8 @@
 //
 import SwiftUI
 import AppChatView
+import AppMeditationAttention
+import UserNotifications
 
 
 private struct SettingsItem: Identifiable {
@@ -49,7 +51,7 @@ struct ProfileView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Dmitriy")
                                     .font(.title2.bold())
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.defaultWhite)
                                 Text("Add my bio")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
@@ -67,30 +69,30 @@ struct ProfileView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.top, 45)
+                    .padding(.top, 65)
 
                     // Streak Section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Streak")
                             .font(.title3.bold())
                             .padding(.horizontal)
-                            .foregroundColor(.black)
+                            .foregroundColor(.defaultWhite)
 
                         HStack {
                             Image(systemName: "bolt.fill")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.defaultWhite)
                             Text("0")
                                 .font(.headline)
-                                .foregroundColor(.black)
+                                .foregroundColor(.defaultWhite)
                             Text("Pray today and start building a habit!")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.defaultWhite)
                                 .font(.subheadline)
                         }
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.gray.opacity(0.2))
+                                .stroke(Color.defaultWhite)
                         )
                         .padding(.horizontal)
                     }
@@ -100,7 +102,7 @@ struct ProfileView: View {
                                             Text("Create a Routine")
                                                 .font(.title3.bold())
                                                 .padding(.horizontal)
-                                                .foregroundColor(.black)
+                                                .foregroundColor(.defaultWhite)
 
                         TabView {
                             ForEach(0..<routineCards.count, id: \.self) { i in
@@ -164,7 +166,7 @@ struct ProfileView: View {
 
                                             TabView {
                                                 RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color.gray.opacity(0.2))
+                                                    .fill(Color.defaultAppGray)
                                                     .frame(width: UIScreen.main.bounds.width - 40, height: 180)
                                                     .overlay(
                                                         Image(systemName: "arrow.down.circle.fill")
@@ -197,7 +199,7 @@ struct ProfileView: View {
 
                                             TabView {
                                                 RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color.gray.opacity(0.2))
+                                                    .fill(Color.defaultAppGray)
                                                     .frame(width: UIScreen.main.bounds.width - 40, height: 180)
                                                     .overlay(
                                                         Image(systemName: "clock.fill")
@@ -217,7 +219,7 @@ struct ProfileView: View {
                                             HStack {
                                                 Text("Your favorite practices")
                                                     .font(.title3.bold())
-                                                    .foregroundColor(.black)
+                                                    .foregroundColor(.defaultWhite)
                                                 Spacer()
                                                 Button {
                                                     selectedStub = "Favorites"
@@ -230,14 +232,14 @@ struct ProfileView: View {
 
                                             TabView {
                                                 RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color.gray.opacity(0.15))
+                                                    .fill(Color.defaultAppGray)
                                                     .frame(width: UIScreen.main.bounds.width - 40, height: 180)
                                                     .overlay(
                                                         Image(systemName: "star.fill")
                                                             .resizable()
                                                             .scaledToFit()
                                                             .frame(width: 40, height: 40)
-                                                            .foregroundColor(.gray)
+                                                            .foregroundColor(.defaultAppWhite)
                                                     )
                                                     .padding(.horizontal, 20)
                                             }
@@ -248,6 +250,7 @@ struct ProfileView: View {
                                         Spacer().frame(height: 40)
                                     }
                                 }
+            .background(Color.defaultAppDark.ignoresSafeArea())
                                 .edgesIgnoringSafeArea(.top)
                                 .navigationDestination(isPresented: $navigateToRoutineEditor) {
                                     EditYourRoutineView()
@@ -266,7 +269,7 @@ struct ProfileView: View {
                     }
 
                     // Для поддержки .navigationDestination(item:)
-                    extension String: Identifiable {
+                    extension String: @retroactive Identifiable {
                         public var id: String { self }
                     }
 
@@ -324,7 +327,7 @@ struct SettingsMainView: View {
                         .foregroundColor(.white)
                         .imageScale(.large)
                         .padding(12)
-                        .background(Color.white.opacity(0.1))
+                        .background(Color.defaultGray)
                         .clipShape(Circle())
                 }
                 Spacer()
@@ -359,7 +362,7 @@ struct SettingsMainView: View {
                             Spacer()
                         }
                         .padding()
-                        .background(Color.white.opacity(0.05))
+                        .background(Color.defaultAppGray)
                         .cornerRadius(12)
                     }
                     .padding(.horizontal)
@@ -379,7 +382,7 @@ struct SettingsMainView: View {
                             }
                         }
                     }
-                    .background(Color.white.opacity(0.05))
+                    .background(Color.defaultAppGray)
                     .cornerRadius(12)
                     .padding(.horizontal)
                 }
@@ -392,7 +395,7 @@ struct SettingsMainView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 20)
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.defaultAppDark.ignoresSafeArea())
         .alert("Log Out", isPresented: $showLogoutAlert) {
             Button("Yes", role: .destructive) {}
             Button("No", role: .cancel) {}
@@ -437,7 +440,7 @@ struct SettingsMainView: View {
             }
         }
         .padding()
-        .background(Color.black)
+        .background(Color.defaultDark)
     }
 }
 struct GeneralSettingsView: View {
@@ -491,7 +494,7 @@ struct GeneralSettingsView: View {
 
             Spacer()
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.defaultAppDark.ignoresSafeArea())
         .navigationDestination(for: String.self) { value in
             PlaceholderView(title: value)
         }
@@ -513,7 +516,7 @@ struct GiftHallowView: View {
                         .foregroundColor(.white)
                         .font(.system(size: 18, weight: .bold))
                         .padding(8)
-                        .background(Color.white.opacity(0.1))
+                        .background(Color.defaultGray)
                         .clipShape(Circle())
                 }
                 Text("Gift Hallow")
@@ -568,7 +571,7 @@ struct GiftHallowView: View {
                 .padding()
             }
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.defaultAppDark.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
     }
@@ -682,79 +685,253 @@ struct EditYourRoutineView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showTimePicker = false
     @State private var selectedTime = Date()
-    @State private var showAddSessionSheet = false
+    @State private var showMeditationsView = false
+    @State private var routineMeditations: [Meditation] = []
+    @State private var showTimeCarousel = false
+    @StateObject private var notificationManager = NotificationManager.shared
+    
+    // Sample suggested meditations
+    let suggestedMeditations = [
+        Meditation(title: "Daily Trivia", subtitle: "Learn about the faith", imageName: "daily_trivia"),
+        Meditation(title: "The Word", subtitle: "Solve the word of the day and learn more about your faith!", imageName: "the_word"),
+        Meditation(title: "Daily Rosary", subtitle: "Daily Mysteries", imageName: "daily_rosary"),
+        Meditation(title: "Divine Revelation", subtitle: "Part 1, Section 1", imageName: "divine_revelation")
+    ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            HStack {
-                Spacer()
-                Button("Done") {
-                    dismiss()
-                }
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.black)
-                .padding()
-            }
-
-            Button(action: { showTimePicker.toggle() }) {
-                Text(timeString(from: selectedTime))
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.black)
-                    .padding(.horizontal)
-            }
-
-            if showTimePicker {
-                DatePicker("", selection: $selectedTime, displayedComponents: .hourAndMinute)
-                    .datePickerStyle(.wheel)
-                    .labelsHidden()
-                    .padding(.horizontal)
-            }
-
-            Button(action: { showAddSessionSheet.toggle() }) {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
                 HStack {
-                    Image(systemName: "plus.circle")
-                        .foregroundColor(.black)
-                    Text("Add session")
-                        .foregroundColor(.black)
-                        .font(.system(size: 17, weight: .medium))
-                }
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
-                .padding(.horizontal)
-            }
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.yellow)
-                        .frame(width: 100, height: 100)
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.red)
-                        .frame(width: 100, height: 100)
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.blue)
-                        .frame(width: 100, height: 100)
+                    Spacer()
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.defaultAppWhite)
                 }
                 .padding(.horizontal)
-            }
-
-            Button("Delete block") {}
-                .font(.system(size: 15))
-                .foregroundColor(.red)
+                .padding(.top, 10)
+                
+                // Title
+                Text("Edit Your Routine")
+                    .font(.title2.bold())
+                    .foregroundColor(.defaultAppWhite)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal)
+                
+                // Time Block and Delete Block
+                HStack(spacing: 12) {
+                    // Time Block (half width)
+                    HStack {
+                        Button(action: { showTimeCarousel.toggle() }) {
+                            HStack(spacing: 8) {
+                                Text(timeString(from: selectedTime))
+                                    .font(.system(size: 32, weight: .bold))
+                                    .foregroundColor(.defaultAppWhite)
+                                
+                                Image(systemName: "chevron.down")
+                                    .foregroundColor(.defaultAppWhite)
+                                    .font(.system(size: 16, weight: .medium))
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: notificationManager.authorizationStatus == .authorized ? "bell.fill" : "bell.slash")
+                            .foregroundColor(notificationManager.authorizationStatus == .authorized ? .green : .red)
+                            .font(.system(size: 20))
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .background(Color.defaultAppGray)
+                    .cornerRadius(12)
+                    
+                    // Delete Block Button (half width)
+                    Button("Delete Block") {
+                        // Handle delete routine
+                    }
+                    .font(.system(size: 15))
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.defaultAppGray)
+                    .cornerRadius(12)
+                }
                 .padding(.horizontal)
-
-            Spacer()
+                
+                // Routine Meditations
+                if !routineMeditations.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Your Routine")
+                            .font(.title3.bold())
+                            .foregroundColor(.defaultAppWhite)
+                            .padding(.horizontal)
+                        
+                        LazyVStack(spacing: 8) {
+                            ForEach(routineMeditations) { meditation in
+                                RoutineMeditationRow(meditation: meditation) {
+                                    removeMeditationFromRoutine(meditation)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                
+                // Add Session Button
+                Button(action: { showMeditationsView = true }) {
+                    HStack(spacing: 16) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(.defaultAppWhite)
+                            .frame(width: 24, height: 24)
+                        
+                        Text("Add Session")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(.defaultAppWhite)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .background(Color.defaultAppGray)
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal)
+                
+                // Suggested Section
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Suggested")
+                        .font(.title3.bold())
+                        .foregroundColor(.defaultAppWhite)
+                        .padding(.horizontal)
+                    
+                    LazyVStack(spacing: 12) {
+                        ForEach(suggestedMeditations) { meditation in
+                            SuggestedMeditationRow(meditation: meditation) {
+                                addMeditationToRoutine(meditation)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                
+                Spacer()
+            }
+            .background(Color.defaultAppDark.ignoresSafeArea())
+            .navigationBarHidden(true)
         }
-        .sheet(isPresented: $showAddSessionSheet) {
-            AddSessionView()
+        .sheet(isPresented: $showMeditationsView) {
+            TopRoutineResultsView(selectedMeditations: $routineMeditations)
+        }
+        .sheet(isPresented: $showTimeCarousel) {
+            TimePickerCarousel(selectedTime: $selectedTime, isPresented: $showTimeCarousel)
+        }
+        .onAppear {
+            if notificationManager.authorizationStatus == .notDetermined {
+                notificationManager.requestNotificationPermission()
+            }
+        }
+        .onChange(of: selectedTime) { newTime in
+            // Schedule notification when time changes
+            if notificationManager.authorizationStatus == .authorized {
+                notificationManager.scheduleMeditationNotification(at: newTime)
+            }
         }
     }
-
+    
     private func timeString(from date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: date)
+    }
+    
+    private func addMeditationToRoutine(_ meditation: Meditation) {
+        if !routineMeditations.contains(where: { $0.id == meditation.id }) {
+            routineMeditations.append(meditation)
+        }
+    }
+    
+    private func removeMeditationFromRoutine(_ meditation: Meditation) {
+        routineMeditations.removeAll { $0.id == meditation.id }
+    }
+}
+
+// MARK: - SuggestedMeditationRow
+struct SuggestedMeditationRow: View {
+    let meditation: Meditation
+    let onAdd: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Meditation Icon
+            Circle()
+                .fill(meditationIconColor(for: meditation.title))
+                .frame(width: 50, height: 50)
+                .overlay(
+                    meditationIcon(for: meditation.title)
+                        .foregroundColor(.white)
+                        .font(.system(size: 20))
+                )
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(meditation.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.defaultAppWhite)
+                
+                Text(meditation.subtitle)
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                    .lineLimit(2)
+            }
+            
+            Spacer()
+            
+            Button("Add") {
+                onAdd()
+            }
+            .font(.system(size: 14, weight: .medium))
+            .foregroundColor(.defaultAppWhite)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color.defaultAppGray)
+            .cornerRadius(8)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.defaultAppGray)
+        .cornerRadius(12)
+    }
+    
+    private func meditationIconColor(for title: String) -> Color {
+        switch title {
+        case "Daily Trivia":
+            return .purple
+        case "The Word":
+            return .blue
+        case "Daily Rosary":
+            return .brown
+        case "Divine Revelation":
+            return .orange
+        default:
+            return .gray
+        }
+    }
+    
+    private func meditationIcon(for title: String) -> some View {
+        switch title {
+        case "Daily Trivia":
+            return Image(systemName: "questionmark.circle")
+        case "The Word":
+            return Image(systemName: "textformat.abc")
+        case "Daily Rosary":
+            return Image(systemName: "cross")
+        case "Divine Revelation":
+            return Image(systemName: "book")
+        default:
+            return Image(systemName: "heart")
+        }
     }
 }
 
@@ -823,14 +1000,380 @@ struct NotificationsView: View {
     }
 }
 
-// MARK: - AddSessionView (mock)
-struct AddSessionView: View {
+// MARK: - RoutineMeditationRow
+struct RoutineMeditationRow: View {
+    let meditation: Meditation
+    let onRemove: () -> Void
+    
     var body: some View {
-        VStack {
-            Text("Add Session")
-                .font(.title)
-                .padding()
+        HStack(spacing: 16) {
+            // Meditation Icon
+            Circle()
+                .fill(meditationIconColor(for: meditation.title))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    meditationIcon(for: meditation.title)
+                        .foregroundColor(.white)
+                        .font(.system(size: 16))
+                )
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(meditation.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.defaultAppWhite)
+                
+                Text(meditation.subtitle)
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
+            }
+            
+            Spacer()
+            
+            Button("Remove") {
+                onRemove()
+            }
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(.red)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.defaultAppGray)
+            .cornerRadius(6)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.defaultAppGray)
+        .cornerRadius(12)
+    }
+    
+    private func meditationIconColor(for title: String) -> Color {
+        switch title {
+        case "Love to body":
+            return .pink
+        case "Daily Trivia":
+            return .purple
+        case "The Word":
+            return .blue
+        case "Daily Rosary":
+            return .brown
+        case "Divine Revelation":
+            return .orange
+        case "Rosary":
+            return .indigo
+        case "Daily Reflections":
+            return .green
+        case "Daily Gospel":
+            return .yellow
+        case "Morning Psalms":
+            return .cyan
+        case "Daily Mass Readings":
+            return .mint
+        case "Daily Saint":
+            return .red
+        case "Gospel of Matthew":
+            return .teal
+        default:
+            return .gray
+        }
+    }
+    
+    private func meditationIcon(for title: String) -> some View {
+        switch title {
+        case "Love to body":
+            return Image(systemName: "heart.fill")
+        case "Daily Trivia":
+            return Image(systemName: "questionmark.circle")
+        case "The Word":
+            return Image(systemName: "textformat.abc")
+        case "Daily Rosary":
+            return Image(systemName: "cross")
+        case "Divine Revelation":
+            return Image(systemName: "book")
+        case "Rosary":
+            return Image(systemName: "pray")
+        case "Daily Reflections":
+            return Image(systemName: "lightbulb")
+        case "Daily Gospel":
+            return Image(systemName: "book.closed")
+        case "Morning Psalms":
+            return Image(systemName: "sunrise")
+        case "Daily Mass Readings":
+            return Image(systemName: "book.pages")
+        case "Daily Saint":
+            return Image(systemName: "person.2")
+        case "Gospel of Matthew":
+            return Image(systemName: "scroll")
+        default:
+            return Image(systemName: "heart")
+        }
+    }
+}
+
+// MARK: - TopRoutineResultsView (MeditationsView)
+struct TopRoutineResultsView: View {
+    @Binding var selectedMeditations: [Meditation]
+    @Environment(\.dismiss) var dismiss
+    @State private var searchText = ""
+    
+    // Extended meditation list based on the screenshot
+    let allMeditations = [
+        Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "love_to_body"),
+        Meditation(title: "Daily Trivia", subtitle: "Learn about the faith", imageName: "daily_trivia"),
+        Meditation(title: "The Word", subtitle: "Solve the word of the day and learn more about your faith!", imageName: "the_word"),
+        Meditation(title: "Daily Rosary", subtitle: "Daily Mysteries • 7 sessions", imageName: "daily_rosary"),
+        Meditation(title: "Divine Revelation", subtitle: "Part 1, Section 1 • 25 sessions", imageName: "divine_revelation"),
+        Meditation(title: "Rosary", subtitle: "Dr. Scott Hahn • 7 sessions", imageName: "rosary"),
+        Meditation(title: "Daily Reflections", subtitle: "Jeff Cavins & Jonathan Roumie • 1415 sessions", imageName: "daily_reflections"),
+        Meditation(title: "Daily Gospel", subtitle: "Daily Lectio Divina • 2136 sessions", imageName: "daily_gospel"),
+        Meditation(title: "Morning Psalms", subtitle: "Bishop Barron • 28 sessions", imageName: "morning_psalms"),
+        Meditation(title: "Daily Mass Readings", subtitle: "Listen & Pray • 1439 sessions", imageName: "daily_mass_readings"),
+        Meditation(title: "Daily Saint", subtitle: "Pray with the Saints • 262 sessions", imageName: "daily_saint"),
+        Meditation(title: "Gospel of Matthew", subtitle: "Biblical Study • 45 sessions", imageName: "gospel_matthew")
+    ]
+    
+    var filteredMeditations: [Meditation] {
+        if searchText.isEmpty {
+            return allMeditations
+        } else {
+            return allMeditations.filter { meditation in
+                meditation.title.localizedCaseInsensitiveContains(searchText) ||
+                meditation.subtitle.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.defaultAppWhite)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                    
+                    Spacer()
+                    
+                    Text("Top Routine Results")
+                        .font(.title3.bold())
+                        .foregroundColor(.defaultAppWhite)
+                    
+                    Spacer()
+                    
+                    Button(action: {}) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.defaultAppWhite)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
+                // Search Bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    
+                    TextField("Search meditations...", text: $searchText)
+                        .foregroundColor(.defaultAppWhite)
+                        .textFieldStyle(PlainTextFieldStyle())
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color.defaultAppGray)
+                .cornerRadius(10)
+                .padding(.horizontal)
+                .padding(.top, 16)
+                
+                // Meditations List
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(filteredMeditations) { meditation in
+                            MeditationRow(meditation: meditation) {
+                                addMeditationToRoutine(meditation)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 20)
+                    .padding(.bottom, 100) // Add bottom padding for better scrolling
+                }
+            }
+            .background(Color.defaultAppDark.ignoresSafeArea())
+            .navigationBarHidden(true)
+        }
+    }
+    
+    private func addMeditationToRoutine(_ meditation: Meditation) {
+        if !selectedMeditations.contains(where: { $0.id == meditation.id }) {
+            selectedMeditations.append(meditation)
+        }
+    }
+}
+
+// MARK: - MeditationRow
+struct MeditationRow: View {
+    let meditation: Meditation
+    let onAdd: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Meditation Icon
+            Circle()
+                .fill(meditationIconColor(for: meditation.title))
+                .frame(width: 50, height: 50)
+                .overlay(
+                    meditationIcon(for: meditation.title)
+                        .foregroundColor(.white)
+                        .font(.system(size: 20))
+                )
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(meditation.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.defaultAppWhite)
+                
+                Text(meditation.subtitle)
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                    .lineLimit(2)
+            }
+            
+            Spacer()
+            
+            Button("Add") {
+                onAdd()
+            }
+            .font(.system(size: 14, weight: .medium))
+            .foregroundColor(.defaultAppWhite)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color.defaultAppGray)
+            .cornerRadius(8)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.defaultAppGray)
+        .cornerRadius(12)
+    }
+    
+    private func meditationIconColor(for title: String) -> Color {
+        switch title {
+        case "Love to body":
+            return .pink
+        case "Daily Trivia":
+            return .purple
+        case "The Word":
+            return .blue
+        case "Daily Rosary":
+            return .brown
+        case "Divine Revelation":
+            return .orange
+        case "Rosary":
+            return .indigo
+        case "Daily Reflections":
+            return .green
+        case "Daily Gospel":
+            return .yellow
+        case "Morning Psalms":
+            return .cyan
+        case "Daily Mass Readings":
+            return .mint
+        case "Daily Saint":
+            return .red
+        case "Gospel of Matthew":
+            return .teal
+        default:
+            return .gray
+        }
+    }
+    
+    private func meditationIcon(for title: String) -> some View {
+        switch title {
+        case "Love to body":
+            return Image(systemName: "heart.fill")
+        case "Daily Trivia":
+            return Image(systemName: "questionmark.circle")
+        case "The Word":
+            return Image(systemName: "textformat.abc")
+        case "Daily Rosary":
+            return Image(systemName: "cross")
+        case "Divine Revelation":
+            return Image(systemName: "book")
+        case "Rosary":
+            return Image(systemName: "pray")
+        case "Daily Reflections":
+            return Image(systemName: "lightbulb")
+        case "Daily Gospel":
+            return Image(systemName: "book.closed")
+        case "Morning Psalms":
+            return Image(systemName: "sunrise")
+        case "Daily Mass Readings":
+            return Image(systemName: "book.pages")
+        case "Daily Saint":
+            return Image(systemName: "person.2")
+        case "Gospel of Matthew":
+            return Image(systemName: "scroll")
+        default:
+            return Image(systemName: "heart")
+        }
+    }
+}
+
+// MARK: - TimePickerCarousel
+struct TimePickerCarousel: View {
+    @Binding var selectedTime: Date
+    @Binding var isPresented: Bool
+    @State private var tempTime: Date
+    @StateObject private var notificationManager = NotificationManager.shared
+    
+    init(selectedTime: Binding<Date>, isPresented: Binding<Bool>) {
+        self._selectedTime = selectedTime
+        self._isPresented = isPresented
+        self._tempTime = State(initialValue: selectedTime.wrappedValue)
+    }
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            // Header
+            HStack {
+                Button("Cancel") {
+                    isPresented = false
+                }
+                .foregroundColor(.defaultAppWhite)
+                
+                Spacer()
+                
+                Text("Select Time")
+                    .font(.headline)
+                    .foregroundColor(.defaultAppWhite)
+                
+                Spacer()
+                
+                Button("Done") {
+                    selectedTime = tempTime
+                    // Schedule notification for the new time
+                    if notificationManager.authorizationStatus == .authorized {
+                        notificationManager.scheduleMeditationNotification(at: tempTime)
+                    }
+                    isPresented = false
+                }
+                .foregroundColor(.defaultAppWhite)
+                .fontWeight(.semibold)
+            }
+            .padding(.horizontal)
+            .padding(.top)
+            
+            // Time Picker
+            DatePicker("", selection: $tempTime, displayedComponents: .hourAndMinute)
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .colorScheme(.dark)
+                .padding(.horizontal)
+            
             Spacer()
         }
+        .background(Color.defaultAppDark.ignoresSafeArea())
     }
 }

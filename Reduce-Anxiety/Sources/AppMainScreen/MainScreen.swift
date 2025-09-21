@@ -58,6 +58,7 @@ public struct HomeView: View {
                 }
                 .navigationTitle("Current progress")
                 .navigationBarTitleDisplayMode(.large)
+                .toolbarBackground(Color.defaultAppGray, for: .navigationBar)
                 .navigationDestination(for: String.self) { route in
                     if route == "meditations" {
                         MeditationsView()
@@ -111,7 +112,7 @@ public struct HomeView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(Color.defaultAppDark)
         }
     }
 
@@ -121,14 +122,14 @@ public struct HomeView: View {
                 Button(action: { selectedFilter = filter }) {
                     Text(filter)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(selectedFilter == filter ? .white : .black)
+                        .foregroundColor(selectedFilter == filter ? .white : .defaultAppWhite)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
-                        .background(selectedFilter == filter ? Color.black : Color.clear)
+                        .background(selectedFilter == filter ? Color.defaultAppWhite : Color.clear)
                         .cornerRadius(8)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color.defaultAppWhite, lineWidth: 1)
                         )
                 }
             }
@@ -149,7 +150,7 @@ struct CurrentProgressContent: View {
                     .frame(width: 70, height: 70)
                 Text("55%")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.defaultAppWhite)
             }
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
@@ -169,7 +170,7 @@ struct CurrentProgressContent: View {
                 }
             }
             .font(.system(size: 16))
-            .foregroundColor(.black)
+            .foregroundColor(.defaultAppWhite)
         }
     }
 }
@@ -212,7 +213,7 @@ struct DailyContributionsContent: View {
                             if let month = monthLabels[col] {
                                 Text(month)
                                     .font(.system(size: 10))
-                                    .foregroundColor(Color.gray.opacity(0.6))
+                                    .foregroundColor(Color.white.opacity(0.6))
                                     .frame(width: cellSize, alignment: .leading)
                             } else {
                                 Spacer().frame(width: cellSize)
@@ -257,13 +258,13 @@ struct DailyAdviceCell: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Daily advice:")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.purple)
+                .foregroundColor(.defaultAppWhite)
             Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
                 .font(.system(size: 16))
-                .foregroundColor(.black)
+                .foregroundColor(.defaultAppWhite)
         }
         .padding(20)
-        .background(Color.yellow.opacity(0.2))
+        .background(Color.defaultAppGray)
         .cornerRadius(14)
     }
 }
@@ -278,7 +279,7 @@ struct HowPassCourseCell: View {
 
                 Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
                     .font(.system(size: 16))
-                    .foregroundColor(.black)
+                    .foregroundColor(.defaultAppWhite)
             }
             .padding(.trailing, 20 + 15) // учёт ширины иконки и отступа
 
@@ -288,11 +289,11 @@ struct HowPassCourseCell: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 15, height: 40)
-                .foregroundColor(.black)
+                .foregroundColor(.defaultAppWhite)
                 .padding(.trailing, 20)
         }
         .padding(20)
-        .background(Color.yellow.opacity(0.2))
+        .background(Color.defaultAppGray)
         .cornerRadius(14)
     }
 }
@@ -315,21 +316,21 @@ struct SquareViewItems: View {
                 if row == 0 {
                     Text("M")
                         .font(.system(size: 10))
-                        .foregroundColor(Color.gray.opacity(0.6))
+                        .foregroundColor(Color.white.opacity(0.6))
                         .frame(width: 20, height: cellSize)
                         .padding(.top, 15) // ⬅️ немного опускаем вниз
                 } else if row == 2 {
                     Spacer().frame(height: cellSize * CGFloat(row - 1) + spacing * CGFloat(row - 1))
                     Text("W")
                         .font(.system(size: 10))
-                        .foregroundColor(Color.gray.opacity(0.6))
+                        .foregroundColor(Color.white.opacity(0.6))
                         .frame(width: 20, height: cellSize)
                 } else if row == 4 {
                     let offset = CGFloat(row) - 3.3
                     Spacer().frame(height: cellSize * offset + spacing * offset)
                     Text("F")
                         .font(.system(size: 10))
-                        .foregroundColor(Color.gray.opacity(0.6))
+                        .foregroundColor(Color.white.opacity(0.6))
                         .frame(width: 20, height: cellSize)
                 }
             }
@@ -348,7 +349,12 @@ struct ProgressAndContributionsCell: View {
                 .environmentObject(progressModel)
         }
         .padding(20)
-        .background(Color.yellow.opacity(0.2))
+        .background(Color.defaultAppGray)
         .cornerRadius(14)
     }
+}
+extension Color {
+    static let defaultAppDark = Color("defaultDark")
+    static let defaultAppWhite = Color("defaultWhite")
+    static let defaultAppGray = Color("defaultGray")
 }

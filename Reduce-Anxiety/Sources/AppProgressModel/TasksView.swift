@@ -9,10 +9,10 @@ import SwiftUI
 import AppProgressModel
 
 // MARK: - Модель записи
-struct Note: Identifiable, Codable {
-    let id: UUID
-    var date: Date
-    var text: String
+public struct Note: Identifiable, Codable {
+    public let id: UUID
+    public var date: Date
+    public var text: String
 
     init(id: UUID = UUID(), date: Date, text: String) {
         self.id = id
@@ -23,10 +23,9 @@ struct Note: Identifiable, Codable {
 // MARK: - Основной экран задач
 public struct TasksView: View {
     @State private var selectedDate: Date? = nil
-    @State private var showingCreateNote = false
-    @State private var pendingNoteDate: Date? = nil
+    @State private var pendingNoteDate: SheetDate? = nil
+
     @EnvironmentObject var progressModel: AppProgressModel
-    // 🔹 Переключение между режимами: мок и обычный
     private let isMockMode = false
 
     private let totalCalendarDays = 92
@@ -39,19 +38,13 @@ public struct TasksView: View {
             return today
         }
     }
-
-    @State private var notes: [Note] = []
-
     public init() {
-        if isMockMode {
-            _notes = State(initialValue: Self.mockNotes())
-        }
+        
     }
-
     public var body: some View {
         NavigationView {
             VStack(spacing: 16) {
-                // Header with missed days
+                // Header
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("Today")
@@ -62,7 +55,7 @@ public struct TasksView: View {
                     HStack {
                         Text(formattedDate(today))
                             .font(.system(size: 26, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(.defaultAppWhite)
                         Spacer()
                         Text("You missed \(missedDays) days")
                             .foregroundColor(.red)
@@ -74,7 +67,7 @@ public struct TasksView: View {
 
                 WeekCalendar(
                     selectedDate: $selectedDate,
-                    notes: notes,
+                    notes: progressModel.notes, // 👈 теперь берём из модели
                     calendarStartDate: calendarStartDate,
                     totalDays: totalCalendarDays
                 )
@@ -82,7 +75,7 @@ public struct TasksView: View {
 
                 ScrollView {
                     VStack(spacing: 12) {
-                        ForEach(displayedDates, id: \ .self) { date in
+                        ForEach(displayedDates, id: \.self) { date in
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(sectionTitle(for: date))
                                     .font(.system(size: 16, weight: .semibold))
@@ -102,33 +95,26 @@ public struct TasksView: View {
                 }
                 Spacer()
             }
-            .background(Color.white.ignoresSafeArea())
+            .background(Color.defaultAppDark.ignoresSafeArea())
             .navigationBarHidden(true)
-            .sheet(isPresented: $showingCreateNote) {
-                if let pendingDate = pendingNoteDate {
-                    CreateNoteView { newNote in
-                        var note = newNote
-                        note.date = pendingDate
-                        notes.append(note)
-                        progressModel.recordNote(on: note.date) // 👈 фиксируем в модели
-                        showingCreateNote = false
-                        pendingNoteDate = nil
-                    }
+            .sheet(item: $pendingNoteDate) { wrapper in
+                CreateNoteView { newNote in
+                    var note = newNote
+                    note.date = wrapper.value
+                    progressModel.recordNote(note) // 👈 только в модель
+                    pendingNoteDate = nil
                 }
+            }
+            .onAppear {
+                print("TasksView opened")
             }
         }
     }
 
-    private var filteredNotes: [Note] {
-        if let selected = selectedDate {
-            return notes.filter { Calendar.current.isDate($0.date, inSameDayAs: selected) }
-        } else {
-            return notes
-        }
-    }
+    // MARK: - Computed properties
 
     private var groupedNotes: [Date: [Note]] {
-        Dictionary(grouping: notes, by: { Calendar.current.startOfDay(for: $0.date) })
+        Dictionary(grouping: progressModel.notes, by: { Calendar.current.startOfDay(for: $0.date) })
     }
 
     private var displayedDates: [Date] {
@@ -139,9 +125,11 @@ public struct TasksView: View {
 
     private var missedDays: Int {
         displayedDates.filter { date in
-            date <= today && !notes.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) })
+            date <= today && !progressModel.notes.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) })
         }.count
     }
+
+    // MARK: - Helpers
 
     private func sectionTitle(for date: Date) -> String {
         if Calendar.current.isDateInToday(date) {
@@ -165,14 +153,13 @@ public struct TasksView: View {
 
         return Button(action: {
             if !isFuture {
-                pendingNoteDate = date
-                showingCreateNote = true
+                pendingNoteDate = SheetDate(value: Calendar.current.startOfDay(for: date))
             }
         }) {
             VStack(spacing: 20) {
                 if isFuture {
                     Text("See you soon!")
-                        .foregroundColor(.black)
+                        .foregroundColor(.defaultAppWhite)
                         .font(.system(size: 16, weight: .medium))
                 } else if isToday {
                     Image(systemName: "plus")
@@ -183,7 +170,7 @@ public struct TasksView: View {
                     VStack(spacing: 20) {
                         Text("Don't forget make\n note on this day")
                             .multilineTextAlignment(.center)
-                            .foregroundColor(.black)
+                            .foregroundColor(.defaultAppWhite)
                             .font(.system(size: 16, weight: .medium))
                         Image(systemName: "plus")
                             .resizable()
@@ -200,41 +187,65 @@ public struct TasksView: View {
                     .foregroundColor(
                         isFuture ? .yellow : (isToday ? .black : .red)
                     )
+                    
             )
+            .background(Color.defaultAppGray)
             .padding(.horizontal)
         }
     }
 
     private func noteCell(_ note: Note) -> some View {
-        VStack(alignment: .leading) {
-            Text(note.text)
-                .foregroundColor(.black)
-                .padding()
+        VStack {
+            HStack(alignment: .bottom) {
+                Text(note.text)
+                    .foregroundColor(.defaultAppWhite)
+                    .font(.system(size: 16))
+                    .lineLimit(nil) // многострочный текст
+                    .padding(.trailing, 8) // отступ, чтобы текст не залезал под дату
+                    .layoutPriority(1)
+
+                Spacer()
+
+                Text(formattedShortDate(note.date))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .fixedSize() // не переносим дату
+            }
+            .padding(12)
         }
-        .background(Color.white)
-        .cornerRadius(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.defaultAppGray)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
+                .foregroundColor(Color.green.opacity(0.7)) // зелёно-салатовая пунктирная рамка
+        )
+        .cornerRadius(10)
         .padding(.horizontal)
     }
 
-    static func mockNotes() -> [Note] {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        return (1...10).compactMap { day in
-            guard day % 2 == 0 else { return nil } // Пропускаем нечетные — как будто не вводили
-            let date = calendar.date(byAdding: .day, value: -day, to: today)!
-            return Note(date: date, text: "Mock note for \(formattedDay(date))")
-        }
-    }
-
-    static func formattedDay(_ date: Date) -> String {
+    private func formattedShortDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .short
+        formatter.dateFormat = "dd.MM.yy"
         return formatter.string(from: date)
     }
 }
 
 
 
+
 #Preview {
     TasksView()
+}
+struct SheetDate: Identifiable, Equatable {
+    let value: Date
+    // Стабильный id по дню (чтобы один и тот же день = один id)
+    var id: TimeInterval { Calendar.current.startOfDay(for: value).timeIntervalSince1970 }
+}
+extension Color {
+    static let defaultAppDark = Color("defaultDark")
+    static let defaultAppWhite = Color("defaultWhite")
+    static let defaultAppGray = Color("defaultGray")
 }

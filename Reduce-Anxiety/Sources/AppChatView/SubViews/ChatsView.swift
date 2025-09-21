@@ -37,10 +37,10 @@ public struct ChatsView: View {
                         .foregroundColor(.gray)
                         .padding(.vertical, 8)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .background(Color.white)
+                        .background(Color.defaultAppDark)
                 }
-                .listRowBackground(Color.white) // фон всей строки — белый
-                .background(Color.white)        // фон секции — белый
+                .listRowBackground(Color.defaultAppDark) // фон всей строки — белый
+                .background(Color.defaultAppDark)        // фон секции — белый
 
                 // Чаты
                 Section {
@@ -67,7 +67,7 @@ public struct ChatsView: View {
                                 }
                             }
                             .padding()
-                            .background(Color.green)
+                            .background(Color.defaultAppGray)
                             .cornerRadius(8)
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -80,7 +80,7 @@ public struct ChatsView: View {
             .listStyle(.plain)
             .navigationTitle("Chats")
             .navigationBarTitleDisplayMode(.large)
-            .background(Color.white.ignoresSafeArea())
+            .background(Color.defaultAppDark.ignoresSafeArea())
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar) // 👈 блюр фона навбара
             .toolbarBackground(.visible, for: .navigationBar)            // 👈 делает его видимым
             .background(

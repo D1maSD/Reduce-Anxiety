@@ -12,7 +12,7 @@ import AppChatView
 import AppOnboarding
 import AppMeditationAttention
 import AppProgressModel
-import AppNotePad
+//import AppNotePad
 
 struct ContentView: View {
     @State private var selectedTab: Tabs = .plus

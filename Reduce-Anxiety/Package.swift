@@ -30,9 +30,7 @@ let package = Package(
         .library(
                    name: "AppPsychologistChat",
                    targets: ["AppPsychologistChat"]),
-        .library(
-                   name: "AppNotePad",
-                   targets: ["AppNotePad"]),
+        
         .library(
                    name: "AppProgressModel",
                    targets: ["AppProgressModel"])
@@ -66,18 +64,10 @@ let package = Package(
             name: "AppChatView"),
         .target(
             name: "AppOnboarding"),
+        
         .target(
-            name: "AppNotePad",
-            dependencies: [
-                "AppProgressModel"
-            ]
-        ),
-        .target(
-            name: "AppProgressModel",
-            dependencies: [
+            name: "AppProgressModel"
             
-            
-            ]
-        ),
+        )
     ]
 )

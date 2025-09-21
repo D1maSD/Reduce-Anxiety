@@ -9,11 +9,17 @@ import SwiftUI
 import AppProgressModel
 // MARK: - Models
 
-struct Meditation: Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-    let imageName: String
+public struct Meditation: Identifiable {
+    public let id = UUID()
+    public let title: String
+    public let subtitle: String
+    public let imageName: String
+    
+    public init(title: String, subtitle: String, imageName: String) {
+        self.title = title
+        self.subtitle = subtitle
+        self.imageName = imageName
+    }
 }
 
 enum GuideOption: String, CaseIterable, Identifiable {
@@ -66,7 +72,7 @@ public struct MeditationsView: View {
                             
                             ZStack(alignment: .bottomLeading) {
                                 RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.gray.opacity(0.3))
+                                    .fill(Color.defaultAppGray)
                                     .frame(height: 240)
                                     .overlay(
                                         VStack(alignment: .leading, spacing: 8) {
@@ -92,7 +98,7 @@ public struct MeditationsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(Color.gray.opacity(0.10), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .background(Color.white.ignoresSafeArea())
+            .background(Color.defaultAppDark)
         }
     }
 }
@@ -110,7 +116,7 @@ struct MeditationDetailView: View {
     @EnvironmentObject var progressModel: AppProgressModel
     var body: some View {
         ZStack {
-            Color(.systemGray6).ignoresSafeArea()
+            Color.defaultAppDark.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Button(action: { showOptionsSheet.toggle() }) {
@@ -147,7 +153,7 @@ struct MeditationDetailView: View {
 
                 Text(meditation.title)
                     .font(.title2.bold())
-                    .foregroundColor(.black)
+                    .foregroundColor(.defaultAppWhite)
                     .padding(.horizontal)
 
                 Text(meditation.subtitle)
@@ -164,9 +170,9 @@ struct MeditationDetailView: View {
                             Image(systemName: "chevron.down")
                         }
                         .padding()
-                        .background(Color.white)
+                        .background(Color.defaultAppGray)
                         .cornerRadius(12)
-                        .foregroundColor(.black)
+                        .foregroundColor(.defaultAppWhite)
                     }
 
                     Button(action: { showMediaOptions.toggle() }) {
@@ -177,9 +183,9 @@ struct MeditationDetailView: View {
                             Image(systemName: "chevron.down")
                         }
                         .padding()
-                        .background(Color.white)
+                        .background(Color.defaultAppGray)
                         .cornerRadius(12)
-                        .foregroundColor(.black)
+                        .foregroundColor(.defaultAppWhite)
                     }
                 }
                 .padding(.horizontal)
@@ -187,7 +193,7 @@ struct MeditationDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Benefits")
                         .font(.headline)
-                        .foregroundColor(.black)
+                        .foregroundColor(.defaultAppWhite)
 
                     Text("Meditation helps reduce stress, improves concentration, and increases self-awareness. Practice daily for best results.")
                         .font(.subheadline)
@@ -195,7 +201,7 @@ struct MeditationDetailView: View {
 
                     Text("How to practice")
                         .font(.headline)
-                        .foregroundColor(.black)
+                        .foregroundColor(.defaultAppWhite)
 
                     Text("Find a quiet place, sit comfortably, and focus on your breath. Allow thoughts to pass without judgment.")
                         .font(.subheadline)
@@ -302,7 +308,7 @@ struct OptionsBottomSheet: View {
             Spacer()
         }
         .padding(.bottom, 16)
-        .background(Color.black)
+        .background(Color.defaultAppDark)
         .cornerRadius(30, corners: [.topLeft, .topRight])
     }
 
@@ -366,7 +372,7 @@ struct MediaOptionsPopup: View {
             Spacer()
         }
         .padding(.bottom, 16)
-        .background(Color.black)
+        .background(Color.defaultAppDark)
         .cornerRadius(30, corners: [.topLeft, .topRight])
     }
 }
@@ -623,3 +629,8 @@ struct MeditationPlayerView: View {
     }
 }
 extension OptionsBottomSheet.OptionItem: Hashable {}
+extension Color {
+    static let defaultAppDark = Color("defaultDark")
+    static let defaultAppWhite = Color("defaultWhite")
+    static let defaultAppGray = Color("defaultGray")
+}

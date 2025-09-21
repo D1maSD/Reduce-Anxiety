@@ -7,7 +7,6 @@
 
 
 import Foundation
-import AppNotePad
 import SwiftUI
 
 public struct DailyActivity: Codable {

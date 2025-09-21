@@ -50,10 +50,10 @@ struct WeekCalendar: View {
 
                             Text(shortDayName(for: date))
                                 .font(.caption2)
-                                .foregroundColor(.black)
+                                .foregroundColor(.defaultAppWhite)
                             Text(dayNumber(for: date))
                                 .font(.headline)
-                                .foregroundColor(.black)
+                                .foregroundColor(.defaultAppWhite)
                         }
                         .frame(width: itemWidth)
                         .padding(8)
@@ -61,7 +61,7 @@ struct WeekCalendar: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.yellow, lineWidth: 2)
                                 .background(
-                                    selectedDate.map { Calendar.current.isDate($0, inSameDayAs: date) } == true ? Color.yellow : Color.clear
+                                    selectedDate.map { Calendar.current.isDate($0, inSameDayAs: date) } == true ? Color.yellow : Color.defaultAppGray
                                 )
                         )
                         .overlay(

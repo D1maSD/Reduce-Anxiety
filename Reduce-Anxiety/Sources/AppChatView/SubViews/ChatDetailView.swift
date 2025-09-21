@@ -64,7 +64,7 @@ struct ChatDetailView: View {
 
                                 Text(message.text)
                                     .padding()
-                                    .background(message.isCurrentUser ? Color.yellow : Color.white)
+                                    .background(message.isCurrentUser ? Color.yellow : Color.defaultAppGray)
                                     .foregroundColor(.black)
                                     .cornerRadius(12)
                                     .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: message.isCurrentUser ? .trailing : .leading)
@@ -90,15 +90,15 @@ struct ChatDetailView: View {
                     TextField("", text: $inputText)
                         .disabled(isLockedChat)
                         .padding(12)
-                        .foregroundColor(.gray)
-                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .background(Color.defaultAppGray)
                         .cornerRadius(10)
                 }
 
                 if !inputText.isEmpty && !isLockedChat {
                     Button(action: sendMessage) {
                         Image(systemName: "arrow.up")
-                            .foregroundColor(.white)
+                            .foregroundColor(.defaultAppDark)
                             .padding(10)
                             .background(Color.blue)
                             .clipShape(Circle())
@@ -109,7 +109,7 @@ struct ChatDetailView: View {
             .padding(.horizontal)
             .padding(.bottom, 8)
         }
-        .background(backgroundColor.ignoresSafeArea())
+        .background(Color.defaultAppDark.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -166,4 +166,9 @@ extension Color {
         let b = Double(rgb & 0xFF) / 255
         self.init(red: r, green: g, blue: b)
     }
+}
+extension Color {
+    static let defaultAppDark = Color("defaultDark")
+    static let defaultAppWhite = Color("defaultWhite")
+    static let defaultAppGray = Color("defaultGray")
 }
