@@ -8,6 +8,35 @@
 import SwiftUI
 import AppProgressModel
 
+// MARK: - Alert Types
+enum MeditationActionType {
+    case favorite
+    case download
+    case routine
+    
+    var message: String {
+        switch self {
+        case .favorite:
+            return "Added to favorites"
+        case .download:
+            return "Audio downloaded"
+        case .routine:
+            return "Added to routine"
+        }
+    }
+    
+    var buttonText: String {
+        switch self {
+        case .favorite:
+            return "View in Profile"
+        case .download:
+            return "View in Profile"
+        case .routine:
+            return "View in Profile"
+        }
+    }
+}
+
 enum GuideOption: String, CaseIterable, Identifiable {
     case jonathan = "Jonathan"
     case anna = "Anna"
@@ -97,6 +126,8 @@ public struct MeditationDetailView: View {
     @State private var showPlayer = false
     @State private var selectedGuide: GuideOption = .jonathan
     @State private var selectedDuration: DurationOption = .eleven
+    @State private var showAlert = false
+    @State private var alertType: MeditationActionType = .favorite
     @EnvironmentObject var progressModel: AppProgressModel
     public var body: some View {
         ZStack {
@@ -197,8 +228,18 @@ public struct MeditationDetailView: View {
             }
         }
         .sheet(isPresented: $showOptionsSheet) {
-            OptionsBottomSheet(meditation: meditation)
-                .environmentObject(progressModel)
+            OptionsBottomSheet(
+                meditation: meditation,
+                onShowAlert: { type in
+                    alertType = type
+                    showAlert = true
+                    // Auto-dismiss after 1.5 seconds
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        showAlert = false
+                    }
+                }
+            )
+            .environmentObject(progressModel)
         }
         .sheet(isPresented: $showGuideSheet) {
             GuideBottomSheetView(selectedGuide: $selectedGuide)
@@ -209,6 +250,83 @@ public struct MeditationDetailView: View {
         .fullScreenCover(isPresented: $showPlayer) {
             MeditationPlayerView(isPresented: $showPlayer, title: meditation.title, subtitle: meditation.subtitle)
                 .environmentObject(progressModel)
+        }
+        .overlay(
+            // Alert overlay with blurred background
+            Group {
+                if showAlert {
+                    ZStack {
+                        // Blurred background
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                            .blur(radius: 10)
+                        
+                        // Centered alert
+                        MeditationActionAlert(
+                            alertType: alertType,
+                            onButtonTap: {
+                                // Simply dismiss the alert - user can navigate to Profile tab to access these screens
+                                showAlert = false
+                            },
+                            isPresented: $showAlert
+                        )
+                    }
+                    .animation(.easeInOut(duration: 0.3), value: showAlert)
+                }
+            }
+        )
+    }
+}
+
+// MARK: - MeditationActionAlert
+struct MeditationActionAlert: View {
+    let alertType: MeditationActionType
+    let onButtonTap: () -> Void
+    @Binding var isPresented: Bool
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            HStack {
+                Image(systemName: iconName)
+                    .foregroundColor(.white)
+                    .font(.system(size: 28, weight: .medium))
+                
+                Text(alertType.message)
+                    .foregroundColor(.white)
+                    .font(.system(size: 20, weight: .medium))
+                
+                Spacer()
+            }
+            
+            Button(action: {
+                onButtonTap()
+                isPresented = false
+            }) {
+                Text(alertType.buttonText)
+                    .foregroundColor(.black)
+                    .font(.system(size: 16, weight: .medium))
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.white)
+                    .cornerRadius(25)
+            }
+        }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 32)
+        .background(Color.defaultAppGray)
+        .cornerRadius(20)
+        .padding(.horizontal, 40)
+        .transition(.scale.combined(with: .opacity))
+    }
+    
+    private var iconName: String {
+        switch alertType {
+        case .favorite:
+            return "heart.fill"
+        case .download:
+            return "arrow.down.circle.fill"
+        case .routine:
+            return "clock.fill"
         }
     }
 }
@@ -246,6 +364,7 @@ struct MeditationsView_Previews: PreviewProvider {
 
 struct OptionsBottomSheet: View {
     let meditation: Meditation
+    let onShowAlert: (MeditationActionType) -> Void
     @EnvironmentObject var progressModel: AppProgressModel
     @Environment(\.dismiss) var dismiss
     
@@ -305,16 +424,18 @@ struct OptionsBottomSheet: View {
         switch item.title {
         case "Download Audio":
             progressModel.meditationManager.downloadMeditation(meditation)
+            onShowAlert(.download)
             dismiss()
         case "Add to Routine":
             progressModel.meditationManager.addToRoutine(meditation)
-            // Navigate to edit routine screen
+            onShowAlert(.routine)
             dismiss()
         case "Favorite":
             if progressModel.meditationManager.isFavorite(meditation) {
                 progressModel.meditationManager.removeFromFavorites(meditation)
             } else {
                 progressModel.meditationManager.addToFavorites(meditation)
+                onShowAlert(.favorite)
             }
             dismiss()
         case "Play":
