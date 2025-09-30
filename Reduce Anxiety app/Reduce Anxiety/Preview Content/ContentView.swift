@@ -17,6 +17,7 @@ import AppProgressModel
 struct ContentView: View {
     @State private var selectedTab: Tabs = .plus
     @State private var isInChatDetail: Bool = false
+    @State private var profileNavigationTarget: String? = nil
     @StateObject var progressModel = AppProgressModel()
 
     var body: some View {
@@ -39,7 +40,10 @@ struct ContentView: View {
             HomeView()
                 .environmentObject(progressModel)
         case .check:
-            MeditationsView()
+            MeditationsView(onNavigateToProfile: { target in
+                profileNavigationTarget = target
+                selectedTab = .profile
+            })
                 .environmentObject(progressModel)
         case .plus:
             TasksView()
@@ -47,7 +51,9 @@ struct ContentView: View {
         case .chat:
             ChatsView($isInChatDetail)
         case .profile:
-            ProfileView()
+            ProfileView(navigationTarget: profileNavigationTarget, onNavigationTargetUsed: {
+                profileNavigationTarget = nil
+            })
                 .environmentObject(progressModel)
         }
     }

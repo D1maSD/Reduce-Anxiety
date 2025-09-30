@@ -66,7 +66,11 @@ enum DurationOption: String, CaseIterable, Identifiable {
 
 public struct MeditationsView: View {
     @EnvironmentObject var progressModel: AppProgressModel
-    public init() {}
+    public let onNavigateToProfile: ((String) -> Void)?
+    
+    public init(onNavigateToProfile: ((String) -> Void)? = nil) {
+        self.onNavigateToProfile = onNavigateToProfile
+    }
 
     public var body: some View {
         NavigationStack {
@@ -75,7 +79,7 @@ public struct MeditationsView: View {
                     Color.clear.frame(height: 0)
                     ForEach(Meditation.coreMeditations) { meditation in
                         NavigationLink(destination:
-                        MeditationDetailView(meditation: meditation)
+                        MeditationDetailView(meditation: meditation, onNavigateToProfile: onNavigateToProfile)
                             .environmentObject(progressModel)
                         ) {
                             
@@ -116,9 +120,11 @@ public struct MeditationsView: View {
 
 public struct MeditationDetailView: View {
     public let meditation: Meditation
+    public let onNavigateToProfile: ((String) -> Void)?
     
-    public init(meditation: Meditation) {
+    public init(meditation: Meditation, onNavigateToProfile: ((String) -> Void)? = nil) {
         self.meditation = meditation
+        self.onNavigateToProfile = onNavigateToProfile
     }
     @State private var showOptionsSheet = false
     @State private var showGuideSheet = false
@@ -129,6 +135,7 @@ public struct MeditationDetailView: View {
     @State private var showAlert = false
     @State private var alertType: MeditationActionType = .favorite
     @EnvironmentObject var progressModel: AppProgressModel
+    @Environment(\.dismiss) var dismiss
     public var body: some View {
         ZStack {
             Color.defaultAppDark.ignoresSafeArea()
@@ -143,11 +150,11 @@ public struct MeditationDetailView: View {
                             .clipShape(Circle())
                     }
                     Spacer()
-                    Button(action: {}) {
+                    Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .foregroundColor(.black)
+                            .foregroundColor(.defaultAppDark)
                             .padding(8)
-                            .background(Color.white)
+                            .background(Color.defaultAppGray)
                             .clipShape(Circle())
                     }
                 }
@@ -180,8 +187,10 @@ public struct MeditationDetailView: View {
                     Button(action: { showGuideSheet.toggle() }) {
                         HStack {
                             Text("Guide")
+                                .font(.system(size: 14, weight: .regular))
                             Spacer()
                             Text(selectedGuide.rawValue)
+                                .font(.system(size: 14, weight: .regular))
                             Image(systemName: "chevron.down")
                         }
                         .padding()
@@ -193,8 +202,10 @@ public struct MeditationDetailView: View {
                     Button(action: { showMediaOptions.toggle() }) {
                         HStack {
                             Text("Media Options")
+                                .font(.system(size: 14, weight: .regular))
                             Spacer()
                             Text(selectedDuration.label)
+                                .font(.system(size: 14, weight: .regular))
                             Image(systemName: "chevron.down")
                         }
                         .padding()
@@ -227,6 +238,23 @@ public struct MeditationDetailView: View {
                 Spacer()
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            // Hide tab bar
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController?.tabBarController?.tabBar.isHidden = true
+            }
+        }
+        .onDisappear {
+            // Show tab bar when leaving
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController?.tabBarController?.tabBar.isHidden = false
+            }
+        }
         .sheet(isPresented: $showOptionsSheet) {
             OptionsBottomSheet(
                 meditation: meditation,
@@ -240,12 +268,21 @@ public struct MeditationDetailView: View {
                 }
             )
             .environmentObject(progressModel)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.hidden)
+            .presentationBackground(Color.defaultAppDark)
         }
         .sheet(isPresented: $showGuideSheet) {
             GuideBottomSheetView(selectedGuide: $selectedGuide)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
+                .presentationBackground(Color.defaultAppDark)
         }
         .sheet(isPresented: $showMediaOptions) {
             MediaOptionsPopup(selectedDuration: $selectedDuration)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
+                .presentationBackground(Color.defaultAppDark)
         }
         .fullScreenCover(isPresented: $showPlayer) {
             MeditationPlayerView(isPresented: $showPlayer, title: meditation.title, subtitle: meditation.subtitle)
@@ -265,8 +302,16 @@ public struct MeditationDetailView: View {
                         MeditationActionAlert(
                             alertType: alertType,
                             onButtonTap: {
-                                // Simply dismiss the alert - user can navigate to Profile tab to access these screens
                                 showAlert = false
+                                // Navigate to Profile tab and specific screen
+                                switch alertType {
+                                case .favorite:
+                                    onNavigateToProfile?("favorites")
+                                case .download:
+                                    onNavigateToProfile?("downloads")
+                                case .routine:
+                                    onNavigateToProfile?("routine")
+                                }
                             },
                             isPresented: $showAlert
                         )
@@ -415,7 +460,6 @@ struct OptionsBottomSheet: View {
             }
             Spacer()
         }
-        .padding(.bottom, 16)
         .background(Color.defaultAppDark)
         .cornerRadius(30, corners: [.topLeft, .topRight])
     }
@@ -469,17 +513,20 @@ struct OptionsBottomSheet: View {
 struct MediaOptionsPopup: View {
     @Binding var selectedDuration: DurationOption
     let durations = [6, 11, 15]
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Spacer()
                 Button(action: {
-                    // UIApplication.shared.mineFrameDynasty()
+                    dismiss()
                 }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(.white)
+                        .foregroundColor(.defaultAppDark)
                         .padding(10)
+                        .background(Color.defaultAppGray)
+                        .clipShape(Circle())
                 }
             }
             .padding(.trailing)
@@ -506,7 +553,6 @@ struct MediaOptionsPopup: View {
 
             Spacer()
         }
-        .padding(.bottom, 16)
         .background(Color.defaultAppDark)
         .cornerRadius(30, corners: [.topLeft, .topRight])
     }
@@ -552,51 +598,71 @@ struct GuideBottomSheetView: View {
     ]
 
     @Binding var selectedGuide: GuideOption
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Guide")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
-                .padding(.top)
-
-            ForEach(guides) { guide in
-                HStack(spacing: 16) {
-                    Image(systemName: guide.imageName)
-                        .resizable()
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(.white)
-                        .background(Circle().fill(Color.gray))
-
-                    VStack(alignment: .leading) {
-                        Text(guide.name)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                        Text(guide.subtitle)
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                    }
-
-                    Spacer()
-
-                    Button(action: {
-                        if let option = GuideOption(rawValue: guide.name) {
-                            selectedGuide = option
-                        }
-                    }) {
-                        Image(systemName: "play.circle.fill")
-                            .resizable()
-                            .frame(width: 28, height: 28)
-                            .foregroundColor(selectedGuide.rawValue == guide.name ? .blue : .white)
-                    }
+        VStack(spacing: 0) {
+            // Header with close button
+            HStack {
+                Spacer()
+                Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.defaultAppDark)
+                        .padding(10)
+                        .background(Color.defaultAppGray)
+                        .clipShape(Circle())
                 }
             }
+            .padding(.trailing)
+            .padding(.top)
+            
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Guide")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.bottom, 20)
 
-            Spacer()
+                ForEach(guides) { guide in
+                    HStack(spacing: 16) {
+                        Image(systemName: guide.imageName)
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.white)
+                            .background(Circle().fill(Color.defaultAppGray))
+
+                        VStack(alignment: .leading) {
+                            Text(guide.name)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                            Text(guide.subtitle)
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                        }
+
+                        Spacer()
+
+                        Button(action: {
+                            if let option = GuideOption(rawValue: guide.name) {
+                                selectedGuide = option
+                            }
+                        }) {
+                            Image(systemName: "play.circle.fill")
+                                .resizable()
+                                .frame(width: 28, height: 28)
+                                .foregroundColor(selectedGuide.rawValue == guide.name ? .blue : .white)
+                        }
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal)
         }
-        .padding()
-        .background(Color(.sRGB, red: 28/255, green: 28/255, blue: 30/255, opacity: 1))
-        .cornerRadius(20)
+        .padding(.bottom, 16)
+        .background(Color.defaultAppDark)
+        .cornerRadius(30, corners: [.topLeft, .topRight])
     }
 }
 
@@ -620,11 +686,13 @@ struct MeditationPlayerView: View {
                 Spacer()
                 Button(action: { isPresented = false }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(.white)
-                        .padding()
-                        .padding(.top, 50)
-                        .padding(.trailing, 15)
+                        .foregroundColor(.defaultAppDark)
+                        .padding(10)
+                        .background(Color.defaultAppGray)
+                        .clipShape(Circle())
                 }
+                .padding(.top, 50)
+                .padding(.trailing, 15)
             }
 
             Spacer()
@@ -674,7 +742,10 @@ struct MeditationPlayerView: View {
                     Image(systemName: "gobackward.10")
                         .resizable()
                         .frame(width: 30, height: 30)
-                        .foregroundColor(.white)
+                        .foregroundColor(.defaultAppDark)
+                        .padding(15)
+                        .background(Color.defaultAppGray)
+                        .clipShape(Circle())
                 }
 
                 Button(action: {
@@ -684,7 +755,9 @@ struct MeditationPlayerView: View {
                     Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
                         .resizable()
                         .frame(width: 60, height: 60)
-                        .foregroundColor(.white)
+                        .foregroundColor(.defaultAppDark)
+                        .background(Color.defaultAppGray)
+                        .clipShape(Circle())
                 }
 
                 Button(action: {
@@ -694,14 +767,17 @@ struct MeditationPlayerView: View {
                     Image(systemName: "goforward.10")
                         .resizable()
                         .frame(width: 30, height: 30)
-                        .foregroundColor(.white)
+                        .foregroundColor(.defaultAppDark)
+                        .padding(15)
+                        .background(Color.defaultAppGray)
+                        .clipShape(Circle())
                 }
             }
             .padding(.top)
 
             Spacer()
         }
-        .background(Color(.sRGB, red: 215/255, green: 93/255, blue: 93/255, opacity: 1))
+        .background(Color.defaultAppDark)
         .edgesIgnoringSafeArea(.all)
         .onAppear {
             setupPlayer()

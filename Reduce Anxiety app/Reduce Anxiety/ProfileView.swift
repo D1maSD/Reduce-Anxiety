@@ -25,6 +25,8 @@ private struct SettingsItem: Identifiable {
 }
 
 struct ProfileView: View {
+    let navigationTarget: String?
+    let onNavigationTargetUsed: (() -> Void)?
     @State private var navigateToSettings = false
     @State private var selectedStub: String?
     @State private var navigateToRoutineEditor = false
@@ -33,6 +35,11 @@ struct ProfileView: View {
     @State private var navigateToFavorites = false
     @State private var navigateToRecentlyPlayed = false
     @EnvironmentObject var progressModel: AppProgressModel
+    
+    init(navigationTarget: String? = nil, onNavigationTargetUsed: (() -> Void)? = nil) {
+        self.navigationTarget = navigationTarget
+        self.onNavigationTargetUsed = onNavigationTargetUsed
+    }
 
     let routineCards = [
         ("Create Your Own Routine", "Get Started"),
@@ -323,6 +330,23 @@ struct ProfileView: View {
                                 .navigationDestination(item: $selectedStub) { title in
                                     StubView(title: title)
                                 }
+                                .onAppear {
+                                    // Handle navigation target from meditation alerts
+                                    if let target = navigationTarget {
+                                        switch target {
+                                        case "favorites":
+                                            navigateToFavorites = true
+                                        case "downloads":
+                                            navigateToDownloads = true
+                                        case "routine":
+                                            navigateToRoutineEditor = true
+                                        default:
+                                            break
+                                        }
+                                        // Clear the navigation target after using it to prevent reopening
+                                        onNavigationTargetUsed?()
+                                    }
+                                }
                             }
                         }
                     }
@@ -455,6 +479,8 @@ struct SettingsMainView: View {
                 .padding(.bottom, 20)
         }
         .background(Color.defaultAppDark.ignoresSafeArea())
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
         .alert("Log Out", isPresented: $showLogoutAlert) {
             Button("Yes", role: .destructive) {}
             Button("No", role: .cancel) {}
@@ -504,6 +530,10 @@ struct SettingsMainView: View {
 }
 struct GeneralSettingsView: View {
     @Environment(\.dismiss) var dismiss
+    @State private var navigateToThemes = false
+    @State private var navigateToStreaks = false
+    @State private var navigateToNotifications = false
+    @State private var navigateToLanguage = false
 
     let settings = [
         "Switch Theme", "Notification Settings", "Privacy",
@@ -533,7 +563,20 @@ struct GeneralSettingsView: View {
             // Settings list
             VStack(spacing: 1) {
                 ForEach(settings, id: \.self) { setting in
-                    NavigationLink(value: setting) {
+                    Button(action: {
+                        switch setting {
+                        case "Switch Theme":
+                            navigateToThemes = true
+                        case "Streaks":
+                            navigateToStreaks = true
+                        case "Notification Settings":
+                            navigateToNotifications = true
+                        case "Language":
+                            navigateToLanguage = true
+                        default:
+                            break
+                        }
+                    }) {
                         HStack {
                             Text(setting)
                                 .foregroundColor(.white)
@@ -554,8 +597,17 @@ struct GeneralSettingsView: View {
             Spacer()
         }
         .background(Color.defaultAppDark.ignoresSafeArea())
-        .navigationDestination(for: String.self) { value in
-            PlaceholderView(title: value)
+        .navigationDestination(isPresented: $navigateToThemes) {
+            ThemesView()
+        }
+        .navigationDestination(isPresented: $navigateToStreaks) {
+            StreaksView()
+        }
+        .navigationDestination(isPresented: $navigateToNotifications) {
+            NotificationSettingsView()
+        }
+        .navigationDestination(isPresented: $navigateToLanguage) {
+            LanguageView()
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
@@ -640,30 +692,53 @@ struct ContactSupportView: View {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 0) {
+            // Custom header
             HStack {
-                Spacer()
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title)
-                        .foregroundColor(.primary)
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.white)
+                        .font(.system(size: 18, weight: .bold))
+                        .padding(8)
+                        .background(Color.defaultGray)
+                        .clipShape(Circle())
                 }
+                Text("Contact & Support")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
             }
             .padding()
+            
+            VStack(spacing: 16) {
+                Text("Hi Dmitriy 👋\nHow can we help?")
+                    .font(.title2.bold())
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding()
 
-            Text("Hi Dmitriy 👋\nHow can we help?")
-                .font(.title2.bold())
-                .padding()
-
-            List {
-                Text("Search for help")
-                Text("How do I cancel my subscription or free trial?")
-                Text("How can I tell if I’m subscribed?")
+                VStack(spacing: 1) {
+                    ForEach(["Search for help", "How do I cancel my subscription or free trial?", "How can I tell if I'm subscribed?"], id: \.self) { item in
+                        HStack {
+                            Text(item)
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .bold))
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                        }
+                        .padding()
+                        .background(Color.defaultAppGray)
+                    }
+                }
+                .background(Color.defaultAppGray)
+                .cornerRadius(12)
+                .padding(.horizontal)
+                
+                Spacer()
             }
         }
-        .navigationBarBackButtonHidden()
+        .background(Color.defaultAppDark.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
     }
@@ -681,7 +756,7 @@ struct LegalView: View {
                         .foregroundColor(.white)
                         .font(.system(size: 18, weight: .bold))
                         .padding(8)
-                        .background(Color.white.opacity(0.1))
+                        .background(Color.defaultGray)
                         .clipShape(Circle())
                 }
                 Text("Legal")
@@ -704,17 +779,17 @@ struct LegalView: View {
                                 .foregroundColor(.gray)
                         }
                         .padding()
-                        .background(Color.white)
+                        .background(Color.defaultAppGray)
                     }
                 }
             }
-            .background(Color.white.opacity(0.05))
+            .background(Color.defaultAppGray)
             .cornerRadius(12)
             .padding()
 
             Spacer()
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.defaultAppDark.ignoresSafeArea())
         .navigationDestination(for: String.self) { value in
             PlaceholderView(title: value)
         }
@@ -730,6 +805,318 @@ struct PlaceholderView: View {
             .font(.largeTitle)
             .bold()
             .padding()
+    }
+}
+
+// MARK: - Themes View
+struct ThemesView: View {
+    @State private var selectedTheme: ThemeOption = .matchDevice
+    
+    enum ThemeOption: String, CaseIterable {
+        case light = "Light Mode"
+        case dark = "Dark Mode"
+        case matchDevice = "Match Device"
+        
+        var description: String {
+            switch self {
+            case .light:
+                return "Change the appearance of the app to a lighter theme."
+            case .dark:
+                return "Change the appearance of the app to a darker theme."
+            case .matchDevice:
+                return "Appearance of app matches the OS theme."
+            }
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Custom header
+            HStack {
+                Text("Themes")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding()
+            
+            // Theme options
+            VStack(spacing: 1) {
+                ForEach(ThemeOption.allCases, id: \.self) { theme in
+                    Button(action: {
+                        selectedTheme = theme
+                    }) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(theme.rawValue)
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 16, weight: .medium))
+                                
+                                Text(theme.description)
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 14))
+                            }
+                            
+                            Spacer()
+                            
+                            // Radio button
+                            ZStack {
+                                Circle()
+                                    .stroke(Color.white, lineWidth: 2)
+                                    .frame(width: 20, height: 20)
+                                
+                                if selectedTheme == theme {
+                                    Circle()
+                                        .fill(Color.purple)
+                                        .frame(width: 12, height: 12)
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(Color.defaultAppGray)
+                    }
+                }
+            }
+            .cornerRadius(12)
+            .padding()
+            
+            Spacer()
+        }
+        .background(Color.defaultAppDark.ignoresSafeArea())
+    }
+}
+
+// MARK: - Streaks View
+struct StreaksView: View {
+    @State private var showStreaks: Bool = true
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Custom header
+            HStack {
+                Text("Streaks")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding()
+            
+            // Streaks toggle
+            VStack(spacing: 1) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Show Streaks")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                        
+                        Text("Display the number of consecutive days you've prayed on Hallow.")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                    }
+                    
+                    Spacer()
+                    
+                    // Toggle switch
+                    Toggle("", isOn: $showStreaks)
+                        .toggleStyle(SwitchToggleStyle(tint: .purple))
+                }
+                .padding()
+                .background(Color.defaultAppGray)
+            }
+            .cornerRadius(12)
+            .padding()
+            
+            Spacer()
+        }
+        .background(Color.defaultAppDark.ignoresSafeArea())
+    }
+}
+
+// MARK: - Notification Settings View
+struct NotificationSettingsView: View {
+    @State private var dailyQuote: Bool = false
+    @State private var campaigns: Bool = true
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Custom header
+            HStack {
+                Text("Notification Settings")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding()
+            
+            // Notification toggles
+            VStack(spacing: 1) {
+                // Daily Quote
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Daily Quote")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                        
+                        Text("Allow Hallow to send you a daily quote to inspire and reflect on the words of scripture, saints and theologians.")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                    }
+                    
+                    Spacer()
+                    
+                    Toggle("", isOn: $dailyQuote)
+                        .toggleStyle(SwitchToggleStyle(tint: .green))
+                }
+                .padding()
+                .background(Color.defaultAppGray)
+                
+                // Campaigns
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Campaigns")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                        
+                        Text("Allow Hallow to send you reminders to keep up with campaigns you join and get updates on those you create.")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                    }
+                    
+                    Spacer()
+                    
+                    Toggle("", isOn: $campaigns)
+                        .toggleStyle(SwitchToggleStyle(tint: .green))
+                }
+                .padding()
+                .background(Color.defaultAppGray)
+            }
+            .cornerRadius(12)
+            .padding()
+            
+            Spacer()
+        }
+        .background(Color.defaultAppDark.ignoresSafeArea())
+    }
+}
+
+// MARK: - Language View
+struct LanguageView: View {
+    @State private var selectedLanguage: String = "English"
+    
+    let languages = [
+        ("English", "Default"),
+        ("Deutsch", nil),
+        ("English + Filipino", nil),
+        ("Español", nil),
+        ("Français", nil),
+        ("Italiano", nil),
+        ("Polski", nil),
+        ("Português", nil)
+    ]
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Custom header
+            HStack {
+                Text("Language")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding()
+            
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Suggested Languages section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Suggested Languages")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                            .padding(.horizontal)
+                        
+                        VStack(spacing: 1) {
+                            ForEach(Array(languages.prefix(1).enumerated()), id: \.offset) { index, language in
+                                Button(action: {
+                                    selectedLanguage = language.0
+                                }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(language.0)
+                                                .foregroundColor(.white)
+                                                .font(.system(size: 16, weight: .medium))
+                                            
+                                            if let subtitle = language.1 {
+                                                Text(subtitle)
+                                                    .foregroundColor(.gray)
+                                                    .font(.system(size: 14))
+                                            }
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        if selectedLanguage == language.0 {
+                                            Image(systemName: "checkmark")
+                                                .foregroundColor(.purple)
+                                                .font(.system(size: 16, weight: .medium))
+                                        }
+                                        
+                                        Image(systemName: "chevron.down")
+                                            .foregroundColor(.gray)
+                                            .font(.system(size: 14))
+                                    }
+                                    .padding()
+                                    .background(Color.defaultAppGray)
+                                }
+                            }
+                        }
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                        
+                        Text("Hallow will use the first language that it supports from Language & Region settings. You can select a different language for Hallow to use if you prefer.")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                            .padding(.horizontal)
+                    }
+                    
+                    // Other Languages section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Other Languages")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                            .padding(.horizontal)
+                            .padding(.top, 20)
+                        
+                        VStack(spacing: 1) {
+                            ForEach(Array(languages.dropFirst().enumerated()), id: \.offset) { index, language in
+                                Button(action: {
+                                    selectedLanguage = language.0
+                                }) {
+                                    HStack {
+                                        Text(language.0)
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 16, weight: .medium))
+                                        
+                                        Spacer()
+                                        
+                                        if selectedLanguage == language.0 {
+                                            Image(systemName: "checkmark")
+                                                .foregroundColor(.purple)
+                                                .font(.system(size: 16, weight: .medium))
+                                        }
+                                    }
+                                    .padding()
+                                    .background(Color.defaultAppGray)
+                                }
+                            }
+                        }
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    }
+                }
+                .padding(.bottom, 20)
+            }
+        }
+        .background(Color.defaultAppDark.ignoresSafeArea())
     }
 }
 

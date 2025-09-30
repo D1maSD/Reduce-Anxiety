@@ -17,8 +17,8 @@ public struct DailyActivity: Codable {
 }
 
 public class AppProgressModel: ObservableObject {
-    @Published var dailyActivities: [DailyActivity] = []
-    @Published var notes: [Note] = [] // ← добавили
+    @Published public var dailyActivities: [DailyActivity] = []
+    @Published public var notes: [Note] = [] // ← добавили
     @Published public var meditationManager = MeditationManager()
 
         private let storageKey = "AppProgressModel_Activities"

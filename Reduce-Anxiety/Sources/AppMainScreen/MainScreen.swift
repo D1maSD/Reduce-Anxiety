@@ -141,14 +141,41 @@ public struct HomeView: View {
 
 struct CurrentProgressContent: View {
     @EnvironmentObject var progressModel: AppProgressModel
+    @State private var animatedProgress: Double = 0.0
+    
+    // Calculate progress based on the logic: 1/100 for meditation with record, 1/200 for meditation without record
+    private var calculatedProgress: Double {
+        let meditationsWithRecord = progressModel.dailyActivities.filter { $0.hasMeditation && $0.hasNote }.count
+        let meditationsWithoutRecord = progressModel.dailyActivities.filter { $0.hasMeditation && !$0.hasNote }.count
+        
+        let totalProgress = (Double(meditationsWithRecord) / 100.0) + (Double(meditationsWithoutRecord) / 200.0)
+        return min(totalProgress, 1.0) // Cap at 100%
+    }
+    
+    private var progressPercentage: Int {
+        return Int(calculatedProgress * 100)
+    }
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
             ZStack {
+                // Background circle
                 Circle()
-                    .stroke(Color.red, lineWidth: 10)
+                    .stroke(Color.defaultAppGray, lineWidth: 8)
                     .frame(width: 70, height: 70)
-                Text("55%")
+                
+                // Animated progress circle
+                Circle()
+                    .trim(from: 0, to: animatedProgress)
+                    .stroke(
+                        Color.green,
+                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                    )
+                    .frame(width: 70, height: 70)
+                    .rotationEffect(.degrees(-90)) // Start from top
+                    .animation(.easeInOut(duration: 1.5), value: animatedProgress)
+                
+                Text("\(progressPercentage)%")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.defaultAppWhite)
             }
@@ -171,6 +198,20 @@ struct CurrentProgressContent: View {
             }
             .font(.system(size: 16))
             .foregroundColor(.defaultAppWhite)
+        }
+        .onAppear {
+            // Start animation from 100% and animate to current progress
+            animatedProgress = 1.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                animatedProgress = calculatedProgress
+            }
+        }
+        .onChange(of: calculatedProgress) { newProgress in
+            // Re-animate when progress changes
+            animatedProgress = 1.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                animatedProgress = newProgress
+            }
         }
     }
 }
