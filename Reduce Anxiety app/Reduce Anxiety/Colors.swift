@@ -12,5 +12,6 @@ extension Color {
     static let defaultAppDark = Color("defaultDark")
     static let defaultAppWhite = Color("defaultWhite")
     static let defaultAppGray = Color("defaultGray")
+//    static let defaultSelected = Color("defaultSelected")
     // добавляй свои цвета по мере необходимости
 }

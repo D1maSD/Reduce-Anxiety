@@ -333,15 +333,18 @@ struct ProfileView: View {
                                 .onAppear {
                                     // Handle navigation target from meditation alerts
                                     if let target = navigationTarget {
-                                        switch target {
-                                        case "favorites":
-                                            navigateToFavorites = true
-                                        case "downloads":
-                                            navigateToDownloads = true
-                                        case "routine":
-                                            navigateToRoutineEditor = true
-                                        default:
-                                            break
+                                        // Add a small delay to ensure the view is fully loaded
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            switch target {
+                                            case "favorites":
+                                                navigateToFavorites = true
+                                            case "downloads":
+                                                navigateToDownloads = true
+                                            case "routine":
+                                                navigateToRoutineEditor = true
+                                            default:
+                                                break
+                                            }
                                         }
                                         // Clear the navigation target after using it to prevent reopening
                                         onNavigationTargetUsed?()
@@ -1506,7 +1509,7 @@ struct RoutineMeditationRow: View {
         case "Daily Reflections":
             return .green
         case "Daily Gospel":
-            return .yellow
+            return .defaultSelected
         case "Morning Psalms":
             return .cyan
         case "Daily Mass Readings":
@@ -1705,7 +1708,7 @@ struct MeditationRow: View {
         case "Daily Reflections":
             return .green
         case "Daily Gospel":
-            return .yellow
+            return .defaultSelected
         case "Morning Psalms":
             return .cyan
         case "Daily Mass Readings":
@@ -1869,7 +1872,7 @@ struct DownloadedMeditationCard: View {
         case "Daily Reflections":
             return .green
         case "Daily Gospel":
-            return .yellow
+            return .defaultSelected
         case "Morning Psalms":
             return .cyan
         case "Daily Mass Readings":
@@ -2121,7 +2124,7 @@ struct DownloadedMeditationRow: View {
         case "Daily Reflections":
             return .green
         case "Daily Gospel":
-            return .yellow
+            return .defaultSelected
         case "Morning Psalms":
             return .cyan
         case "Daily Mass Readings":
