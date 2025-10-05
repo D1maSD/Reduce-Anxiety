@@ -34,6 +34,9 @@ struct ProfileView: View {
     @State private var navigateToDownloads = false
     @State private var navigateToFavorites = false
     @State private var navigateToRecentlyPlayed = false
+    @State private var navigateToReduceAnxietyMeditations = false
+    @State private var navigateToGoodMood = false
+    @State private var navigateToGetHappy = false
     @EnvironmentObject var progressModel: AppProgressModel
     
     init(navigationTarget: String? = nil, onNavigationTargetUsed: (() -> Void)? = nil) {
@@ -317,15 +320,51 @@ struct ProfileView: View {
                                         .environmentObject(progressModel)
                                 }
                                 .navigationDestination(isPresented: $navigateToFavorites) {
-                                    FavoritesView()
+                                    PlaceholderView(title: "Favorites")
                                         .environmentObject(progressModel)
                                 }
                                 .navigationDestination(isPresented: $navigateToRecentlyPlayed) {
-                                    RecentlyPlayedView()
+                                    PlaceholderView(title: "Recently Played")
                                         .environmentObject(progressModel)
                                 }
                                 .navigationDestination(isPresented: $navigateToSettings) {
                                     SettingsMainView()
+                                }
+                                .navigationDestination(isPresented: $navigateToReduceAnxietyMeditations) {
+                                    MeditationCategoryView(
+                                        title: "Reduce anxiety meditations",
+                                        meditations: [getMeditationByTitle("Love to body")]
+                                    )
+                                    .environmentObject(progressModel)
+                                    .onDisappear {
+                                        if navigateToReduceAnxietyMeditations {
+                                            onNavigationTargetUsed?()
+                                        }
+                                    }
+                                }
+                                .navigationDestination(isPresented: $navigateToGoodMood) {
+                                    MeditationCategoryView(
+                                        title: "Good mood",
+                                        meditations: [getMeditationByTitle("Best sides of yourself")]
+                                    )
+                                    .environmentObject(progressModel)
+                                    .onDisappear {
+                                        if navigateToGoodMood {
+                                            onNavigationTargetUsed?()
+                                        }
+                                    }
+                                }
+                                .navigationDestination(isPresented: $navigateToGetHappy) {
+                                    MeditationCategoryView(
+                                        title: "Get happy",
+                                        meditations: [getMeditationByTitle("Santosha")]
+                                    )
+                                    .environmentObject(progressModel)
+                                    .onDisappear {
+                                        if navigateToGetHappy {
+                                            onNavigationTargetUsed?()
+                                        }
+                                    }
                                 }
                                 .navigationDestination(item: $selectedStub) { title in
                                     StubView(title: title)
@@ -342,12 +381,18 @@ struct ProfileView: View {
                                                 navigateToDownloads = true
                                             case "routine":
                                                 navigateToRoutineEditor = true
+                                            case "recents":
+                                                navigateToRecentlyPlayed = true
+                                            case "reduceanxietymeditations":
+                                                navigateToReduceAnxietyMeditations = true
+                                            case "goodmood":
+                                                navigateToGoodMood = true
+                                            case "gethappy":
+                                                navigateToGetHappy = true
                                             default:
                                                 break
                                             }
                                         }
-                                        // Clear the navigation target after using it to prevent reopening
-                                        onNavigationTargetUsed?()
                                     }
                                 }
                             }
@@ -388,6 +433,7 @@ struct StubView: View {
 struct SettingsMainView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showLogoutAlert = false
+    @StateObject private var themeManager = ThemeManager.shared
 
     private let userName = "Dmitriy"
     private let userEmail = "your@email.com"
@@ -424,9 +470,18 @@ struct SettingsMainView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Settings")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.white)
+                        HStack {
+                            Text("Settings")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                            
+                            // Crescent moon icon - color changes based on theme
+                            Image(systemName: "moon.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(themeManager.selectedTheme == .dark ? .black : .white)
+                        }
 
                         HStack(spacing: 16) {
                             Image("avatarPlaceholder")
@@ -540,8 +595,7 @@ struct GeneralSettingsView: View {
 
     let settings = [
         "Switch Theme", "Notification Settings", "Privacy",
-        "Language", "Location", "Streaks",
-        "Apple Health", "Siri Shortcuts", "Export Journals"
+        "Language", "Location", "Streaks"
     ]
 
     var body: some View {
@@ -589,7 +643,7 @@ struct GeneralSettingsView: View {
                                 .foregroundColor(.gray)
                         }
                         .padding()
-                        .background(Color.gray)
+                        .background(Color.defaultDark)
                     }
                 }
             }
@@ -811,9 +865,36 @@ struct PlaceholderView: View {
     }
 }
 
-// MARK: - Themes View
-struct ThemesView: View {
-    @State private var selectedTheme: ThemeOption = .matchDevice
+// MARK: - Settings Manager
+@MainActor
+class SettingsManager: ObservableObject {
+    static let shared = SettingsManager()
+    @Published var showStreaks: Bool = true
+    
+    private init() {
+        loadSettings()
+    }
+    
+    func setShowStreaks(_ show: Bool) {
+        showStreaks = show
+        saveSettings()
+    }
+    
+    private func loadSettings() {
+        showStreaks = UserDefaults.standard.object(forKey: "showStreaks") as? Bool ?? true
+    }
+    
+    private func saveSettings() {
+        UserDefaults.standard.set(showStreaks, forKey: "showStreaks")
+    }
+}
+
+// MARK: - Theme Manager
+@MainActor
+class ThemeManager: ObservableObject {
+    static let shared = ThemeManager()
+    
+    @Published var selectedTheme: ThemeOption = .matchDevice
     
     enum ThemeOption: String, CaseIterable {
         case light = "Light Mode"
@@ -832,6 +913,59 @@ struct ThemesView: View {
         }
     }
     
+    private init() {
+        loadTheme()
+    }
+    
+    func setTheme(_ theme: ThemeOption) {
+        selectedTheme = theme
+        saveTheme()
+        applyTheme()
+    }
+    
+    private func loadTheme() {
+        if let savedTheme = UserDefaults.standard.string(forKey: "selectedTheme"),
+           let theme = ThemeOption(rawValue: savedTheme) {
+            selectedTheme = theme
+        }
+        applyTheme()
+    }
+    
+    private func saveTheme() {
+        UserDefaults.standard.set(selectedTheme.rawValue, forKey: "selectedTheme")
+    }
+    
+    private func applyTheme() {
+        switch selectedTheme {
+        case .light:
+            // Force light mode
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                windowScene.windows.forEach { window in
+                    window.overrideUserInterfaceStyle = .light
+                }
+            }
+        case .dark:
+            // Force dark mode
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                windowScene.windows.forEach { window in
+                    window.overrideUserInterfaceStyle = .dark
+                }
+            }
+        case .matchDevice:
+            // Use system appearance
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                windowScene.windows.forEach { window in
+                    window.overrideUserInterfaceStyle = .unspecified
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Themes View
+struct ThemesView: View {
+    @StateObject private var themeManager = ThemeManager.shared
+    
     var body: some View {
         VStack(spacing: 0) {
             // Custom header
@@ -845,9 +979,9 @@ struct ThemesView: View {
             
             // Theme options
             VStack(spacing: 1) {
-                ForEach(ThemeOption.allCases, id: \.self) { theme in
+                ForEach(ThemeManager.ThemeOption.allCases, id: \.self) { theme in
                     Button(action: {
-                        selectedTheme = theme
+                        themeManager.setTheme(theme)
                     }) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
@@ -868,7 +1002,7 @@ struct ThemesView: View {
                                     .stroke(Color.white, lineWidth: 2)
                                     .frame(width: 20, height: 20)
                                 
-                                if selectedTheme == theme {
+                                if themeManager.selectedTheme == theme {
                                     Circle()
                                         .fill(Color.purple)
                                         .frame(width: 12, height: 12)
@@ -891,7 +1025,7 @@ struct ThemesView: View {
 
 // MARK: - Streaks View
 struct StreaksView: View {
-    @State private var showStreaks: Bool = true
+    @StateObject private var settingsManager = SettingsManager.shared
     
     var body: some View {
         VStack(spacing: 0) {
@@ -920,8 +1054,11 @@ struct StreaksView: View {
                     Spacer()
                     
                     // Toggle switch
-                    Toggle("", isOn: $showStreaks)
-                        .toggleStyle(SwitchToggleStyle(tint: .purple))
+                    Toggle("", isOn: Binding(
+                        get: { settingsManager.showStreaks },
+                        set: { settingsManager.setShowStreaks($0) }
+                    ))
+                    .toggleStyle(SwitchToggleStyle(tint: .purple))
                 }
                 .padding()
                 .background(Color.defaultAppGray)
@@ -939,6 +1076,8 @@ struct StreaksView: View {
 struct NotificationSettingsView: View {
     @State private var dailyQuote: Bool = false
     @State private var campaigns: Bool = true
+    @State private var notificationsEnabled: Bool = true
+    @StateObject private var notificationManager = NotificationManager.shared
     
     var body: some View {
         VStack(spacing: 0) {
@@ -953,6 +1092,35 @@ struct NotificationSettingsView: View {
             
             // Notification toggles
             VStack(spacing: 1) {
+                // Off Notifications
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Off Notifications")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                        
+                        Text("Prevent the application from sending local notifications. Enabling this will allow them to be sent again.")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                    }
+                    
+                    Spacer()
+                    
+                    Toggle("", isOn: $notificationsEnabled)
+                        .toggleStyle(SwitchToggleStyle(tint: .red))
+                        .onChange(of: notificationsEnabled) { enabled in
+                            if enabled {
+                                // Re-enable notifications
+                                notificationManager.requestNotificationPermission()
+                            } else {
+                                // Disable notifications by removing all pending ones
+                                notificationManager.removeMeditationNotifications()
+                            }
+                        }
+                }
+                .padding()
+                .background(Color.defaultAppGray)
+                
                 // Daily Quote
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
@@ -2172,6 +2340,110 @@ struct DownloadedMeditationRow: View {
             return Image(systemName: "scroll")
         default:
             return Image(systemName: "heart")
+        }
+    }
+}
+
+
+// MARK: - Helper Functions
+func getMeditationByTitle(_ title: String) -> Meditation {
+    // This is a placeholder - in a real app, you'd fetch from your data source
+    return Meditation(
+        title: title,
+        subtitle: "Meditation for \(title.lowercased())",
+        imageName: "heart.fill",
+        duration: 10,
+        isDownloaded: false
+    )
+}
+
+// MARK: - Meditation Category View
+struct MeditationCategoryView: View {
+    let title: String
+    let meditations: [Meditation]
+    @EnvironmentObject var progressModel: AppProgressModel
+    @Environment(\.dismiss) var dismiss
+    @State private var selectedMeditation: Meditation?
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.defaultAppWhite)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                    
+                    Spacer()
+                    
+                    Text(title)
+                        .font(.title2.bold())
+                        .foregroundColor(.defaultAppWhite)
+                    
+                    Spacer()
+                    
+                    // Invisible button for balance
+                    Button(action: {}) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.clear)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
+                if meditations.isEmpty {
+                    // Empty state
+                    VStack(spacing: 20) {
+                        Spacer()
+                        
+                        Image(systemName: "heart")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(.gray)
+                        
+                        Text("No Meditations Yet")
+                            .font(.title2.bold())
+                            .foregroundColor(.defaultAppWhite)
+                        
+                        Text("Meditations will appear here when available")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                        
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Meditations list
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(meditations) { meditation in
+                                DownloadedMeditationRow(
+                                    meditation: meditation,
+                                    onDelete: {
+                                        // No delete action for category meditations
+                                    },
+                                    onTap: {
+                                        selectedMeditation = meditation
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 20)
+                    }
+                }
+            }
+            .background(Color.defaultAppDark.ignoresSafeArea())
+            .navigationBarHidden(true)
+            .navigationDestination(item: $selectedMeditation) { meditation in
+                MeditationDetailView(meditation: meditation)
+                    .environmentObject(progressModel)
+            }
         }
     }
 }

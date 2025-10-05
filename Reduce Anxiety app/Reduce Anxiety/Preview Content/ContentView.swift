@@ -37,7 +37,10 @@ struct ContentView: View {
     private func viewForSelectedTab() -> some View {
         switch selectedTab {
         case .home:
-            HomeView()
+            HomeView(onNavigateToProfile: { target in
+                profileNavigationTarget = target
+                selectedTab = .profile
+            })
                 .environmentObject(progressModel)
         case .check:
             MeditationsView(onNavigateToProfile: { target in
@@ -53,6 +56,7 @@ struct ContentView: View {
         case .profile:
             ProfileView(navigationTarget: profileNavigationTarget, onNavigationTargetUsed: {
                 profileNavigationTarget = nil
+                selectedTab = .home
             })
                 .environmentObject(progressModel)
         }

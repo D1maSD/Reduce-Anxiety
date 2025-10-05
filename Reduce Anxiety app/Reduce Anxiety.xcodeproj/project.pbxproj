@@ -31,6 +31,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		184AC6B12E8D7DE40034D572 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1872B9C32D935190004DE16F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5B03EEFFA79DBB8DCDBDE67E;
+			remoteInfo = "Build Target";
+		};
 		1872B9DC2D935193004DE16F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1872B9C32D935190004DE16F /* Project object */;
@@ -146,6 +153,22 @@
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		5B03EEFFA79DBB8DCDBDE67E /* Build Target */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "-c \"${AE76EDB}\"";
+			buildConfigurationList = 184AC6B42E8D8F380034D572 /* Build configuration list */;
+			buildPhases = (
+			);
+			buildToolPath = /bin/sh;
+			dependencies = (
+			);
+			name = "Build Target";
+			passBuildSettingsInEnvironment = 1;
+			productName = "Build Target";
+		};
+/* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
 		1872B9CA2D935190004DE16F /* Reduce Anxiety */ = {
@@ -278,28 +301,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5B03EEFFA79DBB8DCDBDE67E  /* Build Target */,
+				5B03EEFFA79DBB8DCDBDE67E /* Build Target */,
 				1872B9CA2D935190004DE16F /* Reduce Anxiety */,
 				1872B9DA2D935193004DE16F /* Reduce AnxietyTests */,
 				1872B9E42D935193004DE16F /* Reduce AnxietyUITests */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXLegacyTarget section */
-		5B03EEFFA79DBB8DCDBDE67E /* Build Target */ = {
-			isa = PBXLegacyTarget;
-			buildArgumentsString = "-c \"${AE76EDB}\"";
-			buildPhases = (
-			);
-			buildToolPath = /bin/sh;
-			dependencies = (
-			);
-			name = "Build Target";
-			passBuildSettingsInEnvironment = 1;
-			productName = "Build Target";
-		};
-/* End PBXLegacyTarget section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1872B9C92D935190004DE16F /* Resources */ = {
@@ -324,9 +332,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1872B9C72D935190004DE16F /* Sources */ = {
@@ -353,10 +358,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		F0DAA6BA7B58DEC343BDE67E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 5B03EEFFA79DBB8DCDBDE67E /* Build Target */;
-		};
 		1872B9DD2D935193004DE16F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1872B9CA2D935190004DE16F /* Reduce Anxiety */;
@@ -367,9 +368,33 @@
 			target = 1872B9CA2D935190004DE16F /* Reduce Anxiety */;
 			targetProxy = 1872B9E62D935193004DE16F /* PBXContainerItemProxy */;
 		};
+		F0DAA6BA7B58DEC343BDE67E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5B03EEFFA79DBB8DCDBDE67E /* Build Target */;
+			targetProxy = 184AC6B12E8D7DE40034D572 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		184AC6B22E8D7DE50034D572 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Build Target";
+			};
+			name = Debug;
+		};
+		184AC6B32E8D7DE50034D572 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				PRODUCT_NAME = "Build Target";
+			};
+			name = Release;
+		};
 		1872B9ED2D935193004DE16F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -624,6 +649,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		184AC6B42E8D8F380034D572 /* Build configuration list */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				184AC6B22E8D7DE50034D572 /* Debug */,
+				184AC6B32E8D7DE50034D572 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1872B9C62D935190004DE16F /* Build configuration list for PBXProject "Reduce Anxiety" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
