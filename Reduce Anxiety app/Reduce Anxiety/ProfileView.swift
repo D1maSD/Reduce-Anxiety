@@ -311,6 +311,9 @@ struct ProfileView: View {
                                 .edgesIgnoringSafeArea(.top)
                                 .navigationDestination(isPresented: $navigateToRoutineEditor) {
                                     EditYourRoutineView()
+                                        .onDisappear {
+                                            onNavigationTargetUsed?()
+                                        }
                                 }
                                 .navigationDestination(isPresented: $navigateToOptimalRoutine) {
                                     OptimalRoutineView()
@@ -318,14 +321,23 @@ struct ProfileView: View {
                                 .navigationDestination(isPresented: $navigateToDownloads) {
                                     DownloadsView()
                                         .environmentObject(progressModel)
+                                        .onDisappear {
+                                            onNavigationTargetUsed?()
+                                        }
                                 }
                                 .navigationDestination(isPresented: $navigateToFavorites) {
                                     PlaceholderView(title: "Favorites")
                                         .environmentObject(progressModel)
+                                        .onDisappear {
+                                            onNavigationTargetUsed?()
+                                        }
                                 }
                                 .navigationDestination(isPresented: $navigateToRecentlyPlayed) {
                                     PlaceholderView(title: "Recently Played")
                                         .environmentObject(progressModel)
+                                        .onDisappear {
+                                            onNavigationTargetUsed?()
+                                        }
                                 }
                                 .navigationDestination(isPresented: $navigateToSettings) {
                                     SettingsMainView()
