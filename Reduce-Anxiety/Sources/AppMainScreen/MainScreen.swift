@@ -10,6 +10,30 @@ import UIKit
 import AppMeditationAttention
 import AppProgressModel
 
+// MARK: - Settings Manager
+@MainActor
+class SettingsManager: ObservableObject {
+    static let shared = SettingsManager()
+    @Published var showStreaks: Bool = true
+    
+    private init() {
+        loadSettings()
+    }
+    
+    func setShowStreaks(_ show: Bool) {
+        showStreaks = show
+        saveSettings()
+    }
+    
+    private func loadSettings() {
+        showStreaks = UserDefaults.standard.object(forKey: "showStreaks") as? Bool ?? true
+    }
+    
+    private func saveSettings() {
+        UserDefaults.standard.set(showStreaks, forKey: "showStreaks")
+    }
+}
+
 public struct HomeView: View {
     @State private var isGridMode = false
     @State private var selectedFilter: String = "Today"
@@ -17,103 +41,151 @@ public struct HomeView: View {
     @State private var showFilterMenu = false
     @State private var navigateToNotifications = false
     @EnvironmentObject var progressModel: AppProgressModel
+    @StateObject private var settingsManager = SettingsManager.shared
+    
+    // Navigation callback to switch tabs
+    public let onNavigateToProfile: ((String) -> Void)?
 
     let bigSize = UIDevice.current.userInterfaceIdiom == .pad
-    public init() {}
+    
+    public init(onNavigateToProfile: ((String) -> Void)? = nil) {
+        self.onNavigateToProfile = onNavigateToProfile
+    }
 
     public var body: some View {
         NavigationStack(path: $path) {
-            ZStack(alignment: .topTrailing) {
-                Group {
-                    if isGridMode {
-                        VStack(spacing: 0) {
-                            filterButtons
-                                .padding(.top, 12)
-                            ScrollView {
-                                LazyVStack(spacing: 20) {
-                                    ForEach(0..<(selectedFilter == "Today" ? 1 : selectedFilter == "Last 7 days" ? 7 : 20), id: \.self) { _ in
-                                        DailyAdviceCell()
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                                .padding(.top, 12)
-                            }
-                        }
-                    } else {
-                        ScrollView {
-                            VStack(spacing: 20) {
-                                ProgressAndContributionsCell()
-                                    .environmentObject(progressModel)
-                                DailyAdviceCell()
-                                Button(action: {
-                                    path.append("meditations")
-                                }) {
-                                    HowPassCourseCell()
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                            .padding(.top, 12)
-                        }
-                    }
-                }
+            mainContentView
                 .navigationTitle("Current progress")
                 .navigationBarTitleDisplayMode(.large)
                 .toolbarBackground(Color.defaultAppGray, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            showFilterMenu.toggle()
+                        }) {
+                            if let uiImage = UIImage(named: "filter") {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 24, height: 24)
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .tint(.white)
+                    }
+                }
                 .navigationDestination(for: String.self) { route in
                     if route == "meditations" {
                         MeditationsView()
                             .environmentObject(progressModel)
                     } else if route == "notifications" {
-//                        NotificationsView()
                         MeditationsView()
                             .environmentObject(progressModel)
                     }
                 }
-
-                if showFilterMenu {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Button("Days") {
-                            isGridMode.toggle()
-                            showFilterMenu = false
-                        }
-                        .padding(.vertical, 6)
-                        .padding(.horizontal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                        Button("Notifications") {
-                            showFilterMenu = false
-                            path.append("notifications")
-                        }
-                        .padding(.vertical, 6)
-                        .padding(.horizontal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(radius: 5)
-                    .frame(width: UIScreen.main.bounds.width * 0.3)
-                    .padding(.top, 60)
-                    .padding(.trailing, 12)
-                    .zIndex(1)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showFilterMenu.toggle()
-                    }) {
-                        if let uiImage = UIImage(named: "filter") {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: bigSize ? 30 : 30)
-                                .padding(.top, 40)
-                        }
-                    }
-                }
-            }
-            .background(Color.defaultAppDark)
+                .background(Color.defaultAppDark)
         }
+    }
+    
+    private var mainContentView: some View {
+        ZStack(alignment: .topTrailing) {
+            if isGridMode {
+                gridContentView
+            } else {
+                listContentView
+            }
+            
+            if showFilterMenu {
+                filterMenuView
+            }
+        }
+    }
+    
+    private var gridContentView: some View {
+        VStack(spacing: 0) {
+            filterButtons
+                .padding(.top, 12)
+            ScrollView {
+                LazyVStack(spacing: 20) {
+                    ForEach(0..<(selectedFilter == "Today" ? 1 : selectedFilter == "Last 7 days" ? 7 : 20), id: \.self) { _ in
+                        DailyAdviceCell()
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+            }
+        }
+    }
+    
+    private var listContentView: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                if settingsManager.showStreaks {
+                    ProgressAndContributionsCell()
+                        .environmentObject(progressModel)
+                } else {
+                    DailyAdviceCell()
+                }
+                
+                NavigationButtonsView(onNavigateToProfile: onNavigateToProfile)
+                
+                RecentlyPlayedSection(onNavigateToProfile: onNavigateToProfile)
+                    .environmentObject(progressModel)
+                
+                MeditationCategorySection(
+                    title: "Reduce anxiety meditations",
+                    meditations: [getMeditationByTitle("Love to body")],
+                    onNavigateToProfile: onNavigateToProfile
+                )
+                
+                MeditationCategorySection(
+                    title: "Good mood",
+                    meditations: [getMeditationByTitle("Best sides of yourself")],
+                    onNavigateToProfile: onNavigateToProfile
+                )
+                
+                MeditationCategorySection(
+                    title: "Get happy",
+                    meditations: [getMeditationByTitle("Santosha")],
+                    onNavigateToProfile: onNavigateToProfile
+                )
+                
+                Button(action: {
+                    path.append("meditations")
+                }) {
+                    HowPassCourseCell()
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+        }
+    }
+    
+    private var filterMenuView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button("Days") {
+                isGridMode.toggle()
+                showFilterMenu = false
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button("Notifications") {
+                showFilterMenu = false
+                path.append("notifications")
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(radius: 5)
+        .frame(width: UIScreen.main.bounds.width * 0.3)
+        .padding(.top, 60)
+        .padding(.trailing, 12)
+        .zIndex(1)
     }
 
     private var filterButtons: some View {
@@ -206,7 +278,7 @@ struct CurrentProgressContent: View {
                 animatedProgress = calculatedProgress
             }
         }
-        .onChange(of: calculatedProgress) { newProgress in
+        .onChange(of: calculatedProgress) { _, newProgress in
             // Re-animate when progress changes
             animatedProgress = 1.0
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -394,8 +466,232 @@ struct ProgressAndContributionsCell: View {
         .cornerRadius(14)
     }
 }
+
+struct NavigationButtonsView: View {
+    let onNavigateToProfile: ((String) -> Void)?
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Favorites Button
+            NavigationButton(
+                icon: "star",
+                title: "Favorites",
+                action: { onNavigateToProfile?("favorites") }
+            )
+            
+            // Downloads Button
+            NavigationButton(
+                icon: "arrow.down.circle",
+                title: "Downloads",
+                action: { onNavigateToProfile?("downloads") }
+            )
+            
+            // Routine Button
+            NavigationButton(
+                icon: "calendar",
+                title: "Routine",
+                action: { onNavigateToProfile?("routine") }
+            )
+            
+            // Recents Button
+            NavigationButton(
+                icon: "clock",
+                title: "Recents",
+                action: { onNavigateToProfile?("recents") }
+            )
+        }
+        .padding(.horizontal, 20)
+    }
+}
+
+struct NavigationButton: View {
+    let icon: String
+    let title: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundColor(.white)
+                    .frame(width: 24, height: 24)
+                
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 80)
+            .background(Color.defaultAppGray)
+            .cornerRadius(16)
+        }
+    }
+}
+
+// MARK: - Helper Functions
+func getMeditationByTitle(_ title: String) -> Meditation {
+    // This is a placeholder - in a real app, you'd fetch from your data source
+    return Meditation(
+        title: title,
+        subtitle: "Meditation for \(title.lowercased())",
+        imageName: "heart.fill",
+        duration: 10,
+        isDownloaded: false
+    )
+}
+
+// MARK: - Recently Played Section
+struct RecentlyPlayedSection: View {
+    @EnvironmentObject var progressModel: AppProgressModel
+    let onNavigateToProfile: ((String) -> Void)?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Recently played")
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                Spacer()
+                Button {
+                    onNavigateToProfile?("recents")
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.horizontal, 20)
+
+            if progressModel.meditationManager.recentlyPlayedMeditations.isEmpty {
+                TabView {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.defaultAppGray)
+                        .frame(width: UIScreen.main.bounds.width - 40, height: 180)
+                        .overlay(
+                            Image(systemName: "clock.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(.white)
+                        )
+                        .padding(.horizontal, 20)
+                }
+                .frame(height: 200)
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            } else {
+                TabView {
+                    ForEach(progressModel.meditationManager.recentlyPlayedMeditations.prefix(3)) { meditation in
+                        SimpleMeditationCard(meditation: meditation)
+                    }
+                }
+                .frame(height: 200)
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+            }
+        }
+    }
+}
+
+// MARK: - Meditation Category Section
+struct MeditationCategorySection: View {
+    let title: String
+    let meditations: [Meditation]
+    let onNavigateToProfile: ((String) -> Void)?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(title)
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                Spacer()
+                Button {
+                    onNavigateToProfile?(title.lowercased().replacingOccurrences(of: " ", with: ""))
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.horizontal, 20)
+
+            TabView {
+                ForEach(meditations) { meditation in
+                    SimpleMeditationCard(meditation: meditation)
+                }
+            }
+            .frame(height: 200)
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+        }
+    }
+}
+
+// MARK: - Simple Meditation Card
+struct SimpleMeditationCard: View {
+    let meditation: Meditation
+    
+    var body: some View {
+        RoundedRectangle(cornerRadius: 20)
+            .fill(Color.defaultAppGray)
+            .frame(width: UIScreen.main.bounds.width - 40, height: 180)
+            .overlay(
+                VStack(spacing: 12) {
+                    // Meditation Icon
+                    Circle()
+                        .fill(meditationIconColor(for: meditation.title))
+                        .frame(width: 60, height: 60)
+                        .overlay(
+                            meditationIcon(for: meditation.title)
+                                .foregroundColor(.white)
+                                .font(.system(size: 24))
+                        )
+                    
+                    VStack(spacing: 4) {
+                        Text(meditation.title)
+                            .font(.title3.bold())
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                        
+                        Text(meditation.subtitle)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                    }
+                }
+                .padding()
+            )
+            .padding(.horizontal, 20)
+    }
+    
+    private func meditationIconColor(for title: String) -> Color {
+        switch title {
+        case "Love to body":
+            return .pink
+        case "Best sides of yourself":
+            return .blue
+        case "Santosha":
+            return .green
+        default:
+            return .gray
+        }
+    }
+    
+    private func meditationIcon(for title: String) -> some View {
+        switch title {
+        case "Love to body":
+            return Image(systemName: "heart.fill")
+        case "Best sides of yourself":
+            return Image(systemName: "star.fill")
+        case "Santosha":
+            return Image(systemName: "leaf.fill")
+        default:
+            return Image(systemName: "heart")
+        }
+    }
+}
+
 extension Color {
     static let defaultAppDark = Color("defaultDark")
     static let defaultAppWhite = Color("defaultWhite")
     static let defaultAppGray = Color("defaultGray")
+    static let defaultSelected = Color("defaultSelected")
 }

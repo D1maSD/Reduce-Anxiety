@@ -30,18 +30,18 @@ public struct TabBar: View {
             Spacer()
             Button(action: { onTabSelected(.home) }) {
                 Image(systemName: "house")
-                    .foregroundColor(activeTab == .home ? .yellow : .defaultAppWhite)
+                    .foregroundColor(activeTab == .home ? .defaultSelected : .defaultAppWhite)
             }
             Spacer()
             Button(action: { onTabSelected(.check) }) {
                 Image(systemName: "checkmark.circle")
-                    .foregroundColor(activeTab == .check ? .yellow : .defaultAppWhite)
+                    .foregroundColor(activeTab == .check ? .defaultSelected : .defaultAppWhite)
             }
             Spacer()
             Button(action: { onTabSelected(.plus) }) {
                 ZStack {
                     Circle()
-                        .foregroundColor(.yellow)
+                        .foregroundColor(.defaultSelected)
                         .frame(width: 50, height: 50)
                     Image(systemName: "plus")
                         .foregroundColor(.white)
@@ -50,12 +50,12 @@ public struct TabBar: View {
             Spacer()
             Button(action: { onTabSelected(.chat) }) {
                 Image(systemName: "message.fill")
-                    .foregroundColor(activeTab == .chat ? .yellow : .defaultAppWhite)
+                    .foregroundColor(activeTab == .chat ? .defaultSelected : .defaultAppWhite)
             }
             Spacer()
             Button(action: { onTabSelected(.profile) }) {
                 Image(systemName: "person")
-                    .foregroundColor(activeTab == .profile ? .yellow : .defaultAppWhite)
+                    .foregroundColor(activeTab == .profile ? .defaultSelected : .defaultAppWhite)
             }
             Spacer()
         }
@@ -93,4 +93,5 @@ extension Color {
     static let defaultAppDark = Color("defaultDark")
     static let defaultAppWhite = Color("defaultWhite")
     static let defaultAppGray = Color("defaultGray")
+    static let defaultSelected = Color("defaultSelected")
 }

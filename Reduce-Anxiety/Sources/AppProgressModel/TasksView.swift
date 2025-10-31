@@ -184,7 +184,7 @@ public struct TasksView: View {
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(style: StrokeStyle(lineWidth: 2, dash: isToday ? [] : [5]))
                     .foregroundColor(
-                        isFuture ? .yellow : (isToday ? .black : .red)
+                        isFuture ? .defaultSelected : (isToday ? .black : .red)
                     )
                     
             )
@@ -247,4 +247,5 @@ extension Color {
     static let defaultAppDark = Color("defaultDark")
     static let defaultAppWhite = Color("defaultWhite")
     static let defaultAppGray = Color("defaultGray")
+    static let defaultSelected = Color("defaultSelected")
 }

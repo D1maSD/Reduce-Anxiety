@@ -59,9 +59,9 @@ struct WeekCalendar: View {
                         .padding(8)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.yellow, lineWidth: 2)
+                                .stroke(Color.defaultSelected, lineWidth: 2)
                                 .background(
-                                    selectedDate.map { Calendar.current.isDate($0, inSameDayAs: date) } == true ? Color.yellow : Color.defaultAppGray
+                                    selectedDate.map { Calendar.current.isDate($0, inSameDayAs: date) } == true ? Color.defaultSelected : Color.defaultAppGray
                                 )
                         )
                         .overlay(
@@ -100,3 +100,4 @@ struct WeekCalendar: View {
 //#Preview {
 //    WeekCalendar()
 //}
+

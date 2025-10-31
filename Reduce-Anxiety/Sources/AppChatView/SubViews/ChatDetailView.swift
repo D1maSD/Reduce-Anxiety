@@ -47,7 +47,7 @@ struct ChatDetailView: View {
                             // handle subscription
                         }
                         .padding()
-                        .background(Color.yellow)
+                        .background(Color.defaultSelected)
                         .foregroundColor(.black)
                         .cornerRadius(12)
                     }
@@ -64,7 +64,7 @@ struct ChatDetailView: View {
 
                                 Text(message.text)
                                     .padding()
-                                    .background(message.isCurrentUser ? Color.yellow : Color.defaultAppGray)
+                                    .background(message.isCurrentUser ? Color.defaultSelected : Color.defaultAppGray)
                                     .foregroundColor(.black)
                                     .cornerRadius(12)
                                     .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: message.isCurrentUser ? .trailing : .leading)
@@ -171,4 +171,5 @@ extension Color {
     static let defaultAppDark = Color("defaultDark")
     static let defaultAppWhite = Color("defaultWhite")
     static let defaultAppGray = Color("defaultGray")
+    static let defaultSelected = Color("defaultSelected")
 }

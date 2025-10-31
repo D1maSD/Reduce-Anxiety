@@ -43,7 +43,7 @@ Additional tools for developer
                         .font(.system(size: 18, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.yellow)
+                        .background(Color.defaultSelected)
                         .foregroundColor(.black)
                         .cornerRadius(12)
                 }
@@ -60,7 +60,7 @@ Additional tools for developer
                             Text("Notes")
                         }
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.yellow)
+                        .foregroundColor(.defaultSelected)
                     }
                 }
             }
@@ -132,3 +132,4 @@ struct RichTextEditor: UIViewRepresentable {
         }
     }
 }
+
