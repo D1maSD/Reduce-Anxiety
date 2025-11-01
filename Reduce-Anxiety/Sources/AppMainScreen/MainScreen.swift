@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import Foundation
 import AppMeditationAttention
 import AppProgressModel
 
@@ -627,65 +628,59 @@ struct MeditationCategorySection: View {
 // MARK: - Simple Meditation Card
 struct SimpleMeditationCard: View {
     let meditation: Meditation
-    
+    private let cardHeight: CGFloat = 180
+    private var cardWidth: CGFloat {
+        UIScreen.main.bounds.width - 40
+    }
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 20)
-            .fill(Color.defaultAppGray)
-            .frame(width: UIScreen.main.bounds.width - 40, height: 180)
-            .overlay(
-                VStack(spacing: 12) {
-                    // Meditation Icon
-                    Circle()
-                        .fill(meditationIconColor(for: meditation.title))
-                        .frame(width: 60, height: 60)
-                        .overlay(
-                            meditationIcon(for: meditation.title)
-                                .foregroundColor(.white)
-                                .font(.system(size: 24))
-                        )
-                    
-                    VStack(spacing: 4) {
-                        Text(meditation.title)
-                            .font(.title3.bold())
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                        
-                        Text(meditation.subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-                    }
-                }
-                .padding()
-            )
-            .padding(.horizontal, 20)
+        ZStack(alignment: .bottomLeading) {
+            backgroundContent
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(meditation.title)
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+
+                Text(meditation.subtitle)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.85))
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+            }
+            .padding(20)
+        }
+        .frame(width: cardWidth, height: cardHeight)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+        .padding(.horizontal, 20)
     }
-    
-    private func meditationIconColor(for title: String) -> Color {
-        switch title {
-        case "Love to body":
-            return .pink
-        case "Best sides of yourself":
-            return .blue
-        case "Santosha":
-            return .green
-        default:
-            return .gray
+
+    @ViewBuilder
+    private var backgroundContent: some View {
+        if let uiImage = loadImage(named: meditation.imageName) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: cardWidth, height: cardHeight)
+                .clipped()
+                .overlay(
+                    LinearGradient(
+                        colors: [Color.black.opacity(0.0), Color.black.opacity(0.65)],
+                        startPoint: .center,
+                        endPoint: .bottom
+                    )
+                )
+        } else {
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.defaultAppGray)
+                .frame(width: cardWidth, height: cardHeight)
         }
     }
-    
-    private func meditationIcon(for title: String) -> some View {
-        switch title {
-        case "Love to body":
-            return Image(systemName: "heart.fill")
-        case "Best sides of yourself":
-            return Image(systemName: "star.fill")
-        case "Santosha":
-            return Image(systemName: "leaf.fill")
-        default:
-            return Image(systemName: "heart")
-        }
+
+    private func loadImage(named name: String) -> UIImage? {
+        UIImage(named: name)
     }
 }
 

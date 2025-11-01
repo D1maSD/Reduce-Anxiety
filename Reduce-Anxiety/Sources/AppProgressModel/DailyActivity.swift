@@ -124,10 +124,10 @@ public struct Meditation: Identifiable, Codable, Equatable, Hashable, Sendable {
    
    // MARK: - Static Data
    public static let allMeditations: [Meditation] = [
-       Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "love_to_body", audioFileName: "love_to_body.mp3", duration: 10),
-       Meditation(title: "Best sides of yourself", subtitle: "Focus your mind", imageName: "meditation2", audioFileName: "best_sides.mp3", duration: 15),
-       Meditation(title: "Santosha", subtitle: "Focus your mind", imageName: "meditation2", audioFileName: "santosha.mp3", duration: 12),
-       Meditation(title: "Focus mind meditation", subtitle: "Focus your mind", imageName: "meditation2", audioFileName: "focus_mind.mp3", duration: 8),
+       Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "loveToBody", audioFileName: "love_to_body.mp3", duration: 10),
+       Meditation(title: "Best sides of yourself", subtitle: "Focus your mind", imageName: "goodSides", audioFileName: "best_sides.mp3", duration: 15),
+       Meditation(title: "Santosha", subtitle: "Focus your mind", imageName: "santosha", audioFileName: "santosha.mp3", duration: 12),
+       Meditation(title: "Focus mind meditation", subtitle: "Focus your mind", imageName: "focus", audioFileName: "focus_mind.mp3", duration: 8),
        Meditation(title: "Daily Trivia", subtitle: "Learn about the faith", imageName: "daily_trivia", audioFileName: "daily_trivia.mp3", duration: 5),
        Meditation(title: "The Word", subtitle: "Solve the word of the day and learn more about your faith!", imageName: "the_word", audioFileName: "the_word.mp3", duration: 7),
        Meditation(title: "Daily Rosary", subtitle: "Daily Mysteries • 7 sessions", imageName: "daily_rosary", audioFileName: "daily_rosary.mp3", duration: 20),
@@ -143,10 +143,10 @@ public struct Meditation: Identifiable, Codable, Equatable, Hashable, Sendable {
    
    // MARK: - Core Meditations (the 4 main ones)
    public static let coreMeditations: [Meditation] = [
-       Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "love_to_body", audioFileName: "love_to_body.mp3", duration: 10),
-       Meditation(title: "Best sides of yourself", subtitle: "Focus your mind", imageName: "meditation2", audioFileName: "best_sides.mp3", duration: 15),
-       Meditation(title: "Santosha", subtitle: "Focus your mind", imageName: "meditation2", audioFileName: "santosha.mp3", duration: 12),
-       Meditation(title: "Focus mind meditation", subtitle: "Focus your mind", imageName: "meditation2", audioFileName: "focus_mind.mp3", duration: 8)
+       Meditation(title: "Love to body", subtitle: "Relax and unwind", imageName: "loveToBody", audioFileName: "love_to_body.mp3", duration: 10),
+       Meditation(title: "Best sides of yourself", subtitle: "Focus your mind", imageName: "goodSides", audioFileName: "best_sides.mp3", duration: 15),
+       Meditation(title: "Santosha", subtitle: "Focus your mind", imageName: "santosha", audioFileName: "santosha.mp3", duration: 12),
+       Meditation(title: "Focus mind meditation", subtitle: "Focus your mind", imageName: "focus", audioFileName: "focus_mind.mp3", duration: 8)
    ]
 }
 

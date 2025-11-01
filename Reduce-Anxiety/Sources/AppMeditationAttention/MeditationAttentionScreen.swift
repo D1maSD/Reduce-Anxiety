@@ -84,23 +84,35 @@ public struct MeditationsView: View {
                         ) {
                             
                             ZStack(alignment: .bottomLeading) {
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.defaultAppGray)
+                                Image(meditation.imageName)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(maxWidth: .infinity)
                                     .frame(height: 240)
-                                    .overlay(
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            Spacer()
-                                            Text(meditation.title)
-                                                .font(.title2)
-                                                .bold()
-                                                .foregroundColor(.white)
-                                            Text(meditation.subtitle)
-                                                .font(.subheadline)
-                                                .foregroundColor(.white)
-                                        }
-                                        .padding()
-                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+
+                                LinearGradient(
+                                    colors: [Color.black.opacity(0.0), Color.black.opacity(0.65)],
+                                    startPoint: .center,
+                                    endPoint: .bottom
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .allowsHitTesting(false)
+
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(meditation.title)
+                                        .font(.title2)
+                                        .bold()
+                                        .foregroundColor(.white)
+                                    Text(meditation.subtitle)
+                                        .font(.subheadline)
+                                        .foregroundColor(.white)
+                                }
+                                .padding()
                             }
+                            .contentShape(RoundedRectangle(cornerRadius: 20))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 240)
                             .padding(.horizontal)
                         }
                     }
@@ -161,27 +173,49 @@ public struct MeditationDetailView: View {
                 .padding(.horizontal)
                 .padding(.top)
 
-                Spacer()
+                ZStack(alignment: .bottomLeading) {
+                    Image(meditation.imageName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 320)
+                        .clipped()
 
-                Button(action: { showPlayer.toggle() }) {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.black)
-                        .padding(30)
-                        .background(Color.white)
-                        .clipShape(Circle())
+                    LinearGradient(
+                        colors: [Color.black.opacity(0.0), Color.black.opacity(0.7)],
+                        startPoint: .center,
+                        endPoint: .bottom
+                    )
+                    .allowsHitTesting(false)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(meditation.title)
+                            .font(.title2.bold())
+                            .foregroundColor(.white)
+
+                        Text(meditation.subtitle)
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.85))
+                    }
+                    .padding(24)
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
-
-                Text(meditation.title)
-                    .font(.title2.bold())
-                    .foregroundColor(.defaultAppWhite)
-                    .padding(.horizontal)
-
-                Text(meditation.subtitle)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal)
+                .frame(maxWidth: .infinity)
+                .frame(height: 320)
+                .clipShape(RoundedRectangle(cornerRadius: 28))
+                .contentShape(RoundedRectangle(cornerRadius: 28))
+                .overlay(
+                    Button(action: { showPlayer.toggle() }) {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.black)
+                            .padding(30)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                    }
+                    .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 6),
+                    alignment: .center
+                )
+                .padding(.horizontal)
 
                 HStack(spacing: 12) {
                     Button(action: { showGuideSheet.toggle() }) {
