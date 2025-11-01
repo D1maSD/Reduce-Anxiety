@@ -27,14 +27,21 @@ public struct TasksView: View {
     @EnvironmentObject var progressModel: AppProgressModel
     private let isMockMode = false
 
-    private let totalCalendarDays = 92
+    private var totalCalendarDays: Int {
+        let baseWindow = 92
+        let calendar = Calendar.current
+        let start = calendarStartDate
+        let daysSinceStart = max(0, calendar.dateComponents([.day], from: start, to: today).day ?? 0)
+        // Show at least baseWindow days, or enough to keep today centered with upcoming 30 days.
+        return max(baseWindow, daysSinceStart + 30)
+    }
     private let today = Calendar.current.startOfDay(for: Date())
 
     private var calendarStartDate: Date {
         if isMockMode {
             return Calendar.current.date(byAdding: .day, value: -10, to: today) ?? today
         } else {
-            return today
+            return Calendar.current.startOfDay(for: progressModel.appStartDate)
         }
     }
     public init() {

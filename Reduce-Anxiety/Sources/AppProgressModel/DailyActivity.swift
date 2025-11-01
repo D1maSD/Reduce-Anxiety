@@ -20,30 +20,43 @@ public class AppProgressModel: ObservableObject {
     @Published public var dailyActivities: [DailyActivity] = []
     @Published public var notes: [Note] = [] // ← добавили
     @Published public var meditationManager = MeditationManager()
+    @Published public private(set) var appStartDate: Date
 
-        private let storageKey = "AppProgressModel_Activities"
-        private let notesKey = "AppProgressModel_Notes"
+    private let storageKey = "AppProgressModel_Activities"
+    private let notesKey = "AppProgressModel_Notes"
+    private let appStartDateKey = "AppProgressModel_AppStartDate"
 
     public init() {
+        let today = Calendar.current.startOfDay(for: Date())
+        if let storedDate = UserDefaults.standard.object(forKey: appStartDateKey) as? Date {
+            appStartDate = Calendar.current.startOfDay(for: storedDate)
+        } else {
+            appStartDate = today
+            UserDefaults.standard.set(appStartDate, forKey: appStartDateKey)
+        }
         load()
+        normalizeAppStartDate()
     }
 
     public func recordNote(_ note: Note) {
-            update(date: note.date) { activity in
-                activity.hasNote = true
-            }
-            if let idx = notes.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: note.date) }) {
-                notes[idx] = note
-            } else {
-                notes.append(note)
-            }
-            save()
+        update(date: note.date) { activity in
+            activity.hasNote = true
         }
+        if let idx = notes.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: note.date) }) {
+            notes[idx] = note
+        } else {
+            notes.append(note)
+        }
+        ensureAppStartDate(for: note.date)
+        save()
+    }
 
     public func recordMeditation(on date: Date) {
         update(date: date) { activity in
             activity.hasMeditation = true
         }
+        ensureAppStartDate(for: date)
+        save()
     }
 
     public func activities(forLastDays days: Int) -> [DailyActivity] {
@@ -75,28 +88,45 @@ public class AppProgressModel: ObservableObject {
             modify(&new)
             dailyActivities.append(new)
         }
-        save()
+    }
+
+    private func ensureAppStartDate(for date: Date) {
+        let normalized = Calendar.current.startOfDay(for: date)
+        if normalized < appStartDate {
+            appStartDate = normalized
+        }
+    }
+
+    private func normalizeAppStartDate() {
+        if let earliestActivity = dailyActivities.min(by: { $0.date < $1.date }) {
+            ensureAppStartDate(for: earliestActivity.date)
+        }
+        if let earliestNote = notes.min(by: { $0.date < $1.date }) {
+            ensureAppStartDate(for: earliestNote.date)
+        }
+        UserDefaults.standard.set(appStartDate, forKey: appStartDateKey)
     }
 
     private func save() {
-            if let data = try? JSONEncoder().encode(dailyActivities) {
-                UserDefaults.standard.set(data, forKey: storageKey)
-            }
-            if let data = try? JSONEncoder().encode(notes) {
-                UserDefaults.standard.set(data, forKey: notesKey)
-            }
+        if let data = try? JSONEncoder().encode(dailyActivities) {
+            UserDefaults.standard.set(data, forKey: storageKey)
         }
+        if let data = try? JSONEncoder().encode(notes) {
+            UserDefaults.standard.set(data, forKey: notesKey)
+        }
+        UserDefaults.standard.set(appStartDate, forKey: appStartDateKey)
+    }
 
     private func load() {
-            if let data = UserDefaults.standard.data(forKey: storageKey),
-               let decoded = try? JSONDecoder().decode([DailyActivity].self, from: data) {
-                dailyActivities = decoded
-            }
-            if let data = UserDefaults.standard.data(forKey: notesKey),
-               let decoded = try? JSONDecoder().decode([Note].self, from: data) {
-                notes = decoded
-            }
+        if let data = UserDefaults.standard.data(forKey: storageKey),
+           let decoded = try? JSONDecoder().decode([DailyActivity].self, from: data) {
+            dailyActivities = decoded
         }
+        if let data = UserDefaults.standard.data(forKey: notesKey),
+           let decoded = try? JSONDecoder().decode([Note].self, from: data) {
+            notes = decoded
+        }
+    }
 }
 
 import Foundation
