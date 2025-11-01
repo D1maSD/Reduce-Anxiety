@@ -2359,11 +2359,15 @@ struct DownloadedMeditationRow: View {
 
 // MARK: - Helper Functions
 func getMeditationByTitle(_ title: String) -> Meditation {
-    // This is a placeholder - in a real app, you'd fetch from your data source
+    if let meditation = Meditation.allMeditations.first(where: { $0.title == title }) {
+        return meditation
+    }
+
     return Meditation(
         title: title,
         subtitle: "Meditation for \(title.lowercased())",
-        imageName: "heart.fill",
+        imageName: "",
+        audioFileName: nil,
         duration: 10,
         isDownloaded: false
     )

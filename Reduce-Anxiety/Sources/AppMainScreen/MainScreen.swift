@@ -532,11 +532,15 @@ struct NavigationButton: View {
 
 // MARK: - Helper Functions
 func getMeditationByTitle(_ title: String) -> Meditation {
-    // This is a placeholder - in a real app, you'd fetch from your data source
+    if let meditation = Meditation.allMeditations.first(where: { $0.title == title }) {
+        return meditation
+    }
+
     return Meditation(
         title: title,
         subtitle: "Meditation for \(title.lowercased())",
-        imageName: "heart.fill",
+        imageName: "",
+        audioFileName: nil,
         duration: 10,
         isDownloaded: false
     )
@@ -563,31 +567,44 @@ struct RecentlyPlayedSection: View {
             }
             .padding(.horizontal, 20)
 
-            if progressModel.meditationManager.recentlyPlayedMeditations.isEmpty {
-                TabView {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.defaultAppGray)
-                        .frame(width: UIScreen.main.bounds.width - 40, height: 180)
-                        .overlay(
-                            Image(systemName: "clock.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 40, height: 40)
-                                .foregroundColor(.white)
-                        )
-                        .padding(.horizontal, 20)
-                }
-                .frame(height: 200)
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            } else {
-                TabView {
-                    ForEach(progressModel.meditationManager.recentlyPlayedMeditations.prefix(3)) { meditation in
-                        SimpleMeditationCard(meditation: meditation)
-                    }
-                }
-                .frame(height: 200)
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+            RecentlyPlayedCarousel(
+                meditations: Array(progressModel.meditationManager.recentlyPlayedMeditations.prefix(3))
+            )
+        }
+    }
+}
+
+private struct RecentlyPlayedCarousel: View {
+    let meditations: [Meditation]
+    private let cardWidth = UIScreen.main.bounds.width - 40
+    private let cardHeight: CGFloat = 180
+    private let cornerRadius: CGFloat = 20
+
+    var body: some View {
+        if meditations.isEmpty {
+            TabView {
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(Color.defaultAppGray)
+                    .frame(width: cardWidth, height: cardHeight)
+                    .overlay(
+                        Image(systemName: "clock.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.white)
+                    )
+                    .padding(.horizontal, 20)
             }
+            .frame(height: cardHeight + 20)
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        } else {
+            TabView {
+                ForEach(Array(meditations.enumerated()), id: \.offset) { _, meditation in
+                    SimpleMeditationCard(meditation: meditation)
+                }
+            }
+            .frame(height: cardHeight + 20)
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
         }
     }
 }

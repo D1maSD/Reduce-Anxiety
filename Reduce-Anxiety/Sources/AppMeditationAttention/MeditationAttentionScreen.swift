@@ -319,7 +319,12 @@ public struct MeditationDetailView: View {
                 .presentationBackground(Color.defaultAppDark)
         }
         .fullScreenCover(isPresented: $showPlayer) {
-            MeditationPlayerView(isPresented: $showPlayer, title: meditation.title, subtitle: meditation.subtitle)
+            MeditationPlayerView(
+                isPresented: $showPlayer,
+                meditation: meditation,
+                title: meditation.title,
+                subtitle: meditation.subtitle
+            )
                 .environmentObject(progressModel)
         }
         .overlay(
@@ -705,6 +710,7 @@ import AVFoundation
 
 struct MeditationPlayerView: View {
     @Binding var isPresented: Bool
+    let meditation: Meditation
     let title: String
     let subtitle: String
     @State private var hasRecordedMeditation = false
@@ -814,6 +820,7 @@ struct MeditationPlayerView: View {
         .background(Color.defaultAppDark)
         .edgesIgnoringSafeArea(.all)
         .onAppear {
+            progressModel.meditationManager.markAsPlayed(meditation)
             setupPlayer()
         }
         .onDisappear {
