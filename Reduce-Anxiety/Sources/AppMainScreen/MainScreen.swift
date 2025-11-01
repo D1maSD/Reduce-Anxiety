@@ -291,80 +291,202 @@ struct CurrentProgressContent: View {
 
 
 struct DailyContributionsContent: View {
-    let rows = 7
-    let columns = 12
-    let cellSize: CGFloat = 20
-    let spacing: CGFloat = 4
-    let contributions: [Bool] = (0..<84).map { _ in Bool.random() }
     @EnvironmentObject var progressModel: AppProgressModel
-    private var dailyData: [DailyActivity] {
-            progressModel.activities(forLastDays: 84)
-        }
+    @State private var displayedMonth: Date = Calendar.current.startOfMonth(for: Date())
 
-    private var monthLabels: [Int: String] {
-        var labels: [Int: String] = [:]
-        let calendar = Calendar.current
-        let today = Date()
-        for i in 0..<columns {
-            if let date = calendar.date(byAdding: .weekOfYear, value: -columns + i + 1, to: today) {
-                let month = calendar.component(.month, from: date)
-                let monthSymbol = calendar.shortMonthSymbols[month - 1]
-                if i == 0 || calendar.component(.month, from: calendar.date(byAdding: .weekOfYear, value: -columns + i, to: today)!) != month {
-                    labels[i] = monthSymbol
-                }
-            }
-        }
-        return labels
-    }
+    private let locale = Locale(identifier: "ru_RU")
+    private let daySize: CGFloat = 32
+    private let circleScale: CGFloat = 1.15
+    private let daySpacing: CGFloat = 10
+    private let fullFillColor = Color(.sRGB, red: 0.19, green: 0.70, blue: 0.36, opacity: 0.9)
+    private let partialFillColor = Color(.sRGB, red: 0.40, green: 0.60, blue: 0.50, opacity: 0.45)
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            SquareViewItems()
-            ScrollView(.horizontal, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: spacing) {
-                        ForEach(0..<columns, id: \.self) { col in
-                            if let month = monthLabels[col] {
-                                Text(month)
-                                    .font(.system(size: 10))
-                                    .foregroundColor(Color.white.opacity(0.6))
-                                    .frame(width: cellSize, alignment: .leading)
-                            } else {
-                                Spacer().frame(width: cellSize)
-                            }
-                        }
-                    }
-                    HStack(spacing: spacing) {
-                                            ForEach(0..<columns, id: \.self) { column in
-                                                VStack(spacing: spacing) {
-                                                    ForEach(0..<rows, id: \.self) { row in
-                                                        let index = column * rows + row
-                                                        if index < dailyData.count {
-                                                            let activity = dailyData[index]
-                                                            Rectangle()
-                                                                .fill(color(for: activity))
-                                                                .frame(width: cellSize, height: cellSize)
-                                                                .cornerRadius(4)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+        VStack(alignment: .leading, spacing: 16) {
+            calendarHeader
+            weekdayHeader
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: daySpacing), count: 7), spacing: daySpacing) {
+                ForEach(daysForDisplayedMonth, id: \.self) { date in
+                    dayCell(for: date)
                 }
             }
         }
+        .padding(.horizontal, 8)
     }
-    
-    private func color(for activity: DailyActivity) -> Color {
-        if activity.hasNote && activity.hasMeditation {
-            return Color.green.opacity(0.8) // темно-зелёный
-        } else if activity.hasNote || activity.hasMeditation {
-            return Color.green.opacity(0.4) // светло-зелёный
-        } else {
-            return Color.gray.opacity(0.2)
+
+    private var calendarHeader: some View {
+        HStack {
+            Button(action: { displayedMonth = adjustedMonth(by: -1) }) {
+                Image(systemName: "chevron.left")
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            Text(monthTitle)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+
+            Spacer()
+
+            Button(action: { if canNavigateForward { displayedMonth = adjustedMonth(by: 1) } }) {
+                Image(systemName: "chevron.right")
+                    .opacity(canNavigateForward ? 1.0 : 0.3)
+            }
+            .buttonStyle(.plain)
+            .disabled(!canNavigateForward)
+        }
+        .foregroundColor(.white)
+    }
+
+    private var weekdayHeader: some View {
+        let symbols = weekdaySymbols
+        return HStack(spacing: daySpacing) {
+            ForEach(symbols, id: \.self) { symbol in
+                Text(symbol)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.6))
+                    .frame(maxWidth: .infinity)
+            }
         }
     }
 
+    private func dayCell(for date: Date) -> some View {
+        let calendar = configuredCalendar
+        let isCurrentMonth = calendar.isDate(date, equalTo: displayedMonth, toGranularity: .month)
+        let isToday = calendar.isDateInToday(date)
+        let activity = activity(for: date)
+        let fillColor = backgroundColor(for: activity)
+        let textColor = isCurrentMonth ? Color.white.opacity(0.8) : Color.white.opacity(0.35)
+
+        return ZStack {
+            Circle()
+                .fill(fillColor)
+                .frame(width: daySize * circleScale, height: daySize * circleScale)
+                .overlay(
+                    Circle()
+                        .stroke(isToday ? Color.white.opacity(0.6) : Color.clear, lineWidth: isToday ? 2 : 0)
+                )
+                .allowsHitTesting(false)
+
+            Text(dayNumberFormatter.string(from: date))
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(textColor)
+        }
+        .frame(width: daySize, height: daySize)
+    }
+
+    private var daysForDisplayedMonth: [Date] {
+        let calendar = configuredCalendar
+        let startOfMonth = calendar.startOfMonth(for: displayedMonth)
+        guard let range = calendar.range(of: .day, in: .month, for: startOfMonth) else { return [] }
+
+        let firstDayIndex = weekdayIndex(for: startOfMonth)
+        let firstDisplayedDay = calendar.date(byAdding: .day, value: -firstDayIndex, to: startOfMonth) ?? startOfMonth
+
+        let lastDay = calendar.date(byAdding: .day, value: range.count - 1, to: startOfMonth) ?? startOfMonth
+        let lastDayIndex = weekdayIndex(for: lastDay)
+        let trailingDays = 6 - lastDayIndex
+
+        let totalDays = range.count + firstDayIndex + trailingDays
+
+        return (0..<totalDays).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: firstDisplayedDay)
+        }
+    }
+
+    private var activityMap: [Date: DailyActivity] {
+        let calendar = configuredCalendar
+        return progressModel.dailyActivities.reduce(into: [Date: DailyActivity]()) { result, activity in
+            let key = calendar.startOfDay(for: activity.date)
+            result[key] = activity
+        }
+    }
+
+    private func activity(for date: Date) -> DailyActivity? {
+        let calendar = configuredCalendar
+        let key = calendar.startOfDay(for: date)
+        return activityMap[key]
+    }
+
+    private func backgroundColor(for activity: DailyActivity?) -> Color {
+        guard let activity = activity else { return .clear }
+        if activity.hasNote && activity.hasMeditation {
+            return fullFillColor
+        }
+        if activity.hasNote || activity.hasMeditation {
+            return partialFillColor
+        }
+        return .clear
+    }
+
+    private var configuredCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = locale
+        calendar.firstWeekday = 2
+        return calendar
+    }
+
+    private var monthTitle: String {
+        monthFormatter.string(from: displayedMonth).capitalized(with: locale)
+    }
+
+    private var weekdaySymbols: [String] {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        let fallback = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+        let symbols = formatter.shortWeekdaySymbols ?? fallback
+        let startIndex = max(0, min(symbols.count - 1, configuredCalendar.firstWeekday - 1))
+        let leading = Array(symbols[startIndex...])
+        let trailing = Array(symbols[..<startIndex])
+        let reordered = leading + trailing
+        return reordered.map { $0.capitalized(with: locale) }
+    }
+
+    private func weekdayIndex(for date: Date) -> Int {
+        let calendar = configuredCalendar
+        let weekday = calendar.component(.weekday, from: date)
+        return (weekday - calendar.firstWeekday + 7) % 7
+    }
+
+    private func adjustedMonth(by value: Int) -> Date {
+        let calendar = configuredCalendar
+        let newDate = calendar.date(byAdding: .month, value: value, to: displayedMonth) ?? displayedMonth
+        return calendar.startOfMonth(for: newDate)
+    }
+
+    private var canNavigateForward: Bool {
+        let calendar = configuredCalendar
+        return !calendar.isDate(displayedMonth, equalTo: Date(), toGranularity: .month)
+    }
+
+    private var monthFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.dateFormat = "LLLL yyyy"
+        return formatter
+    }
+
+    private var dayNumberFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.dateFormat = "d"
+        return formatter
+    }
+}
+
+private extension Calendar {
+    func startOfMonth(for date: Date) -> Date {
+        let components = dateComponents([.year, .month], from: date)
+        return self.date(from: components) ?? date
+    }
+}
+
+extension Color {
+    static let defaultAppDark = Color("defaultDark")
+    static let defaultAppWhite = Color("defaultWhite")
+    static let defaultAppGray = Color("defaultGray")
+    static let defaultSelected = Color("defaultSelected")
 }
 
 struct DailyAdviceCell: View {
@@ -414,43 +536,6 @@ struct HowPassCourseCell: View {
 
 #Preview {
     HomeView()
-}
-
-struct SquareViewItems: View {
-    let rows = 7
-    let columns = 12
-    let cellSize: CGFloat = 20
-    let spacing: CGFloat = 4
-
-    // Подставные данные активности (записи пользователя по дням)
-    let contributions: [Bool] = (0..<84).map { _ in Bool.random() }
-    var body: some View {
-        VStack(spacing: spacing) {
-            ForEach(0..<rows, id: \.self) { row in
-                if row == 0 {
-                    Text("M")
-                        .font(.system(size: 10))
-                        .foregroundColor(Color.white.opacity(0.6))
-                        .frame(width: 20, height: cellSize)
-                        .padding(.top, 15) // ⬅️ немного опускаем вниз
-                } else if row == 2 {
-                    Spacer().frame(height: cellSize * CGFloat(row - 1) + spacing * CGFloat(row - 1))
-                    Text("W")
-                        .font(.system(size: 10))
-                        .foregroundColor(Color.white.opacity(0.6))
-                        .frame(width: 20, height: cellSize)
-                } else if row == 4 {
-                    let offset = CGFloat(row) - 3.3
-                    Spacer().frame(height: cellSize * offset + spacing * offset)
-                    Text("F")
-                        .font(.system(size: 10))
-                        .foregroundColor(Color.white.opacity(0.6))
-                        .frame(width: 20, height: cellSize)
-                }
-            }
-            Spacer() // добиваем до полного по высоте
-        }
-    }
 }
 
 struct ProgressAndContributionsCell: View {
@@ -699,11 +784,4 @@ struct SimpleMeditationCard: View {
     private func loadImage(named name: String) -> UIImage? {
         UIImage(named: name)
     }
-}
-
-extension Color {
-    static let defaultAppDark = Color("defaultDark")
-    static let defaultAppWhite = Color("defaultWhite")
-    static let defaultAppGray = Color("defaultGray")
-    static let defaultSelected = Color("defaultSelected")
 }
