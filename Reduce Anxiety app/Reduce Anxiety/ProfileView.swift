@@ -326,14 +326,14 @@ struct ProfileView: View {
                                         }
                                 }
                                 .navigationDestination(isPresented: $navigateToFavorites) {
-                                    PlaceholderView(title: "Favorites")
+                                    FavoritesView()
                                         .environmentObject(progressModel)
                                         .onDisappear {
                                             onNavigationTargetUsed?()
                                         }
                                 }
                                 .navigationDestination(isPresented: $navigateToRecentlyPlayed) {
-                                    PlaceholderView(title: "Recently Played")
+                                    RecentlyPlayedView()
                                         .environmentObject(progressModel)
                                         .onDisappear {
                                             onNavigationTargetUsed?()
@@ -2174,6 +2174,186 @@ struct DownloadsView: View {
                                     },
                                     onTap: {
                                         selectedMeditation = downloadedMeditation.meditation
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 20)
+                    }
+                }
+            }
+            .background(Color.defaultAppDark.ignoresSafeArea())
+            .navigationBarHidden(true)
+            .navigationDestination(item: $selectedMeditation) { meditation in
+                MeditationDetailView(meditation: meditation)
+                    .environmentObject(progressModel)
+            }
+        }
+    }
+}
+
+// MARK: - FavoritesView
+struct FavoritesView: View {
+    @EnvironmentObject var progressModel: AppProgressModel
+    @Environment(\.dismiss) var dismiss
+    @State private var selectedMeditation: Meditation?
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.defaultAppWhite)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                    
+                    Spacer()
+                    
+                    Text("Favorites")
+                        .font(.title2.bold())
+                        .foregroundColor(.defaultAppWhite)
+                    
+                    Spacer()
+                    
+                    // Invisible button for balance
+                    Button(action: {}) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.clear)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
+                if progressModel.meditationManager.favoriteMeditations.isEmpty {
+                    // Empty state
+                    VStack(spacing: 20) {
+                        Spacer()
+                        
+                        Image(systemName: "star.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(.gray)
+                        
+                        Text("No Favorites Yet")
+                            .font(.title2.bold())
+                            .foregroundColor(.defaultAppWhite)
+                        
+                        Text("Tap the heart icon on any meditation to add it to favorites")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Favorites list
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(progressModel.meditationManager.favoriteMeditations) { meditation in
+                                DownloadedMeditationRow(
+                                    meditation: meditation,
+                                    onDelete: {
+                                        progressModel.meditationManager.removeFromFavorites(meditation)
+                                    },
+                                    onTap: {
+                                        selectedMeditation = meditation
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 20)
+                    }
+                }
+            }
+            .background(Color.defaultAppDark.ignoresSafeArea())
+            .navigationBarHidden(true)
+            .navigationDestination(item: $selectedMeditation) { meditation in
+                MeditationDetailView(meditation: meditation)
+                    .environmentObject(progressModel)
+            }
+        }
+    }
+}
+
+// MARK: - RecentlyPlayedView
+struct RecentlyPlayedView: View {
+    @EnvironmentObject var progressModel: AppProgressModel
+    @Environment(\.dismiss) var dismiss
+    @State private var selectedMeditation: Meditation?
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.defaultAppWhite)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                    
+                    Spacer()
+                    
+                    Text("Recently Played")
+                        .font(.title2.bold())
+                        .foregroundColor(.defaultAppWhite)
+                    
+                    Spacer()
+                    
+                    // Invisible button for balance
+                    Button(action: {}) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.clear)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
+                if progressModel.meditationManager.recentlyPlayedMeditations.isEmpty {
+                    // Empty state
+                    VStack(spacing: 20) {
+                        Spacer()
+                        
+                        Image(systemName: "clock.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(.gray)
+                        
+                        Text("No Recent Activity")
+                            .font(.title2.bold())
+                            .foregroundColor(.defaultAppWhite)
+                        
+                        Text("Play meditations and they will appear here")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Recently played list
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(progressModel.meditationManager.recentlyPlayedMeditations) { meditation in
+                                DownloadedMeditationRow(
+                                    meditation: meditation,
+                                    onDelete: {
+                                        progressModel.meditationManager.removeFromRecentlyPlayed(meditation)
+                                    },
+                                    onTap: {
+                                        selectedMeditation = meditation
                                     }
                                 )
                             }

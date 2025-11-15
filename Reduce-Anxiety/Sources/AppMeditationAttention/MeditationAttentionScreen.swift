@@ -151,27 +151,27 @@ public struct MeditationDetailView: View {
     public var body: some View {
         ZStack {
             Color.defaultAppDark.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Button(action: { showOptionsSheet.toggle() }) {
-                        Image(systemName: "ellipsis")
-                            .rotationEffect(.degrees(90))
-                            .foregroundColor(.black)
-                            .padding(8)
-                            .background(Color.white)
-                            .clipShape(Circle())
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Button(action: { showOptionsSheet.toggle() }) {
+                            Image(systemName: "ellipsis")
+                                .rotationEffect(.degrees(90))
+                                .foregroundColor(.black)
+                                .padding(8)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                        }
+                        Spacer()
+                        Button(action: { dismiss() }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.defaultAppDark)
+                                .padding(8)
+                                .background(Color.defaultAppGray)
+                                .clipShape(Circle())
+                        }
                     }
-                    Spacer()
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.defaultAppDark)
-                            .padding(8)
-                            .background(Color.defaultAppGray)
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.top)
+                    .padding(.top)
 
                 ZStack(alignment: .bottomLeading) {
                     Image(meditation.imageName)
@@ -215,7 +215,6 @@ public struct MeditationDetailView: View {
                     .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 6),
                     alignment: .center
                 )
-                .padding(.horizontal)
 
                 HStack(spacing: 12) {
                     Button(action: { showGuideSheet.toggle() }) {
@@ -248,7 +247,6 @@ public struct MeditationDetailView: View {
                         .foregroundColor(.defaultAppWhite)
                     }
                 }
-                .padding(.horizontal)
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Benefits")
@@ -267,9 +265,10 @@ public struct MeditationDetailView: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
-                .padding(.horizontal)
 
                 Spacer()
+                }
+                .padding(.horizontal, 20)
             }
         }
         .navigationBarBackButtonHidden(true)

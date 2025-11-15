@@ -232,24 +232,26 @@ struct CurrentProgressContent: View {
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
             ZStack {
-                // Background circle
                 Circle()
-                    .stroke(Color.defaultAppGray, lineWidth: 8)
-                    .frame(width: 70, height: 70)
-                
-                // Animated progress circle
+                    .stroke(Color.white.opacity(0.08), lineWidth: 18)
+                    .frame(width: 74, height: 74)
+
+                Circle()
+                    .stroke(Color.defaultAppGray.opacity(0.6), lineWidth: 12)
+                    .frame(width: 74, height: 74)
+
                 Circle()
                     .trim(from: 0, to: animatedProgress)
                     .stroke(
                         Color.green,
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 12, lineCap: .round)
                     )
-                    .frame(width: 70, height: 70)
-                    .rotationEffect(.degrees(-90)) // Start from top
+                    .frame(width: 74, height: 74)
+                    .rotationEffect(.degrees(-90))
                     .animation(.easeInOut(duration: 1.5), value: animatedProgress)
-                
+
                 Text("\(progressPercentage)%")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.defaultAppWhite)
             }
             VStack(alignment: .leading, spacing: 8) {
@@ -785,3 +787,28 @@ struct SimpleMeditationCard: View {
         UIImage(named: name)
     }
 }
+//struct User {
+//    let name: String
+//    let age: Int
+//
+//    init(name: String, age: Int) {
+//        self.name = name
+//        self.age = age
+//    }
+//
+//    // Альтернативный инициализатор
+//    init(name: String) {
+//        self.name = name
+////        self.age = 18
+//    }
+//}
+
+//actor Counter {
+//    let name: String
+//    var value: Int// = 0
+//
+//    init(name: String) {
+//        self.name = name
+//        // нельзя делать await здесь
+//    }
+//}

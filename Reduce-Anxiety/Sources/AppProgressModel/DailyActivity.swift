@@ -272,6 +272,11 @@ public class MeditationManager: ObservableObject {
        saveRecentlyPlayedMeditations()
    }
    
+   public func removeFromRecentlyPlayed(_ meditation: Meditation) {
+       recentlyPlayedMeditations.removeAll { $0.id == meditation.id }
+       saveRecentlyPlayedMeditations()
+   }
+   
    // MARK: - Routine Management
    public func addToRoutine(_ meditation: Meditation) {
        if !routineMeditations.contains(where: { $0.id == meditation.id }) {
